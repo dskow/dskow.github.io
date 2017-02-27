@@ -9,8 +9,6 @@
   A sidebar provides a way to display meta content intended for temporary access (navigation links, buttons, menus, etc.). The sidebar can be revealed by a button tap while the main content remains visually underneath.
 -->
 <!-- -->
-<!doctype html>
-<html ⚡>
 <head>
   <meta charset="utf-8">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -75,21 +73,24 @@
       </ul>
     </amp-sidebar>
 
+    <div class="menu-icon">
+        <a on="tap:sidebar.open">
+            <span class="big-icon icon--hamburger"><svg viewbox="0 0 32 32"><path d="M4,10h24c1.104,0,2-0.896,2-2s-0.896-2-2-2H4C2.896,6,2,6.896,2,8S2.896,10,4,10z M28,14H4c-1.104,0-2,0.896-2,2  s0.896,2,2,2h24c1.104,0,2-0.896,2-2S29.104,14,28,14z M28,22H4c-1.104,0-2,0.896-2,2s0.896,2,2,2h24c1.104,0,2-0.896,2-2  S29.104,22,28,22z"></path></svg></span>
+        </a>
+    </div>
     <!-- #### Sidebar Actions -->
     <!--
     Click to toggle the sidebar.
-    -->
     <button on="tap:sidebar.toggle">Toggle sidebar</button>
+    -->
 
     <!--
     Click to open the sidebar.
-    -->
     <button on="tap:sidebar.open">Open sidebar</button>
+    -->
 
     <!--
     Click to close the sidebar.
-    -->
     <button on="tap:sidebar.close">Close sidebar</button>
+    -->
 
-</body>
-</html>
