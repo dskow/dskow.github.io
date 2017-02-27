@@ -93,7 +93,7 @@ main { display: block; }
 .pagination .disabled { opacity: 0; }
 
   
-  </style></noscript>
+  </style>
   <style amp-custom>
     amp-sidebar {
       width: 250px;
