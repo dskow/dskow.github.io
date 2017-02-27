@@ -20,7 +20,80 @@
   <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script> 
   <link rel="canonical" href="<%host%>/components/amp-sidebar/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+  
+    
+amp-sidebar { width: 250px; background-color: white; }
+amp-sidebar ul, amp-sidebar li { margin: 0; padding: 0; }
+amp-sidebar li { list-style: none; height: 100%; }
+amp-sidebar a { padding: 0.6em 0 0.6em 0.6em; display: block; text-decoration: none; color: black; }
+amp-sidebar a:hover { background: #828282; color: white; }
+
+.right { float: right; }
+
+body { font-family: "Helvetica Neue", "Open Sans", Arial, Helvetica, sans-serif; margin: 0; padding: 0; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-font-feature-settings: "liga=1, dlig=1"; -webkit-font-feature-settings: "liga", "dlig"; -o-font-feature-settings: "liga", "dlig"; font-feature-settings: "liga", "dlig"; }
+
+html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+
+*, *:before, *:after { -webkit-box-sizing: inherit; -moz-box-sizing: inherit; box-sizing: inherit; }
+
+.icon > svg { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
+.icon > svg path { fill: #828282; }
+
+.big-icon > svg { display: inline-block; width: 32px; height: 32px; vertical-align: middle; }
+.big-icon > svg path { fill: #828282; }
+
+.menu-icon { cursor: pointer; }
+
+amp-img { background-color: #828282; }
+
+.cf:after { content: ""; display: table; clear: both; }
+
+main { display: block; }
+
+.site-header { position: relative; width: 100%; max-width: 700px; margin: 16px auto 0 auto; }
+@media only screen and (max-width: 800px) { .site-header { padding: 0 16px; } }
+.site-header .page-links { display: block; position: absolute; top: 10px; right: 16px; font-weight: 200; font-style: normal; font-size: 18px; line-height: 30px; }
+.site-header .page-links a { text-decoration: none; color: #999999; }
+.site-header .page-links a:hover { color: #333333; }
+
+.blog-header { width: 100%; max-width: 700px; margin: 0 auto; position: relative; padding: 0; }
+.blog-header .blog-title { margin-bottom: 8px; font-size: 50px; font-weight: 700; letter-spacing: -2px; outline: 0; line-height: 50px; word-break: break-word; color: #333333; }
+.blog-header .blog-description { font-size: 28px; margin: 0 0 20px; padding: 0; line-height: 1.2; color: #666666; font-weight: 300; }
+
+.content { width: 100%; max-width: 700px; margin: 25px auto 0 auto; }
+@media only screen and (max-width: 800px) { .content { padding: 0 16px; } }
+.content article { padding: 20px 0; border-bottom: 1px solid #f2f2f0; }
+.content article:last-child { border-bottom: 0; }
+.content article .post-title { letter-spacing: -0.02em; font-weight: 700; font-style: normal; display: block; font-size: 36px; line-height: 1.15; margin: 0 0; }
+.content article .post-title a { text-decoration: none; color: #333332; }
+.content article .post-title a:hover { text-decoration: none; }
+.content article .post-excerpt { letter-spacing: -0.02em; font-weight: 300; font-style: normal; font-size: 20px; line-height: 1.59; color: #666665; }
+.content article .post-meta { font-size: 14px; color: #b3b3b1; line-height: 30px; }
+.content article .post-meta a { color: #b3b3b1; text-decoration: none; }
+.content article .post-meta a:hover { text-decoration: underline; }
+
+.post-template .content { max-width: 700px; }
+
+.index-headline { border-top: 1px solid #dededc; margin: 0; padding: 16px 0; }
+.index-headline span { color: #b3b3b1; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+.pagination { text-align: center; padding: 16px 0 0; font-size: 12px; }
+.pagination a { color: #999999; text-decoration: none; }
+.pagination a:hover { color: #333333; }
+
+.site-footer { margin: 0 auto; padding: 48px 0; width: 100%; max-width: 700px; font-size: 12px; text-align: center; color: #999999; line-height: 17.6px; }
+.site-footer a { color: #666666; text-decoration: none; }
+.site-footer a:hover { color: #333333; }
+
+.share { text-align: right; padding: 20px 0 0; }
+.share a { text-decoration: none; color: #bbbbbb; }
+.share a:hover { color: #333333; }
+
+.pagination .disabled { opacity: 0; }
+
+  
+  </style></noscript>
   <style amp-custom>
     amp-sidebar {
       width: 250px;
