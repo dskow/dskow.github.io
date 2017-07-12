@@ -5,7 +5,7 @@ title: Injecting Crud Repo in Spring Boot App
 
 # Injecting Crud Repo in Spring Boot App
 
-This technique provides a clean solution to adding a database client connection to your Spring boot app.  It uses some maven dependencies, an interface file, an application.yml file, a model object, and some annotations.  Some databases that allow this technique are: mongo, elasticsearch, and fuseki.
+This technique provides a clean solution to adding a database client connection to your Spring boot app.  It uses some maven dependencies, an interface file, an application.yml file, a model object, and some annotations.  Some databases that allow this technique are: mongo, elasticsearch, neo4j, and fuseki.
 
 Here are a list of spring boot [starters](http://docs.spring.io/spring-boot/docs/1.5.3.RELEASE/reference/htmlsingle/#using-boot-starter) that you can try.
 
@@ -39,8 +39,6 @@ Add the dependency for spring boot starter for mongo.
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
-
-		The propagation of this type of volume is rprivate.
 
 Create a repository interface.  This interface will reference the Document model stored in that repository.  In this example PubmedArticle is used.  The Query annotations define custom queries in addition to the default ones provided from MongoRepository.
 
@@ -177,6 +175,67 @@ Use it.
 			logRepo.refresh();
 		}
 
+### Neo4j 
+
+I pull this example from the web and modified it to be injected.
+
+Add dependency
+
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-data-neo4j</artifactId>
+	</dependency>
+
+
+Add interface
+
+	interface MovieRepository extends GraphRepository<Movie> {
+
+	  @Query("MATCH (m:Movie)<-[rating:RATED]-(user)
+		  WHERE id(m) = {movieId} RETURN rating")
+	  Iterable<Rating> getRatings(@Param("movieID") Long movieId);
+
+	  List<Movie> findByTitle(String title);
+	}
+	
+Add model
+
+	@NodeEntity
+	public class Movie {
+
+	  @GraphId Long id;
+
+	  String title;
+
+	  Person director;
+
+	  @Relationship(type="ACTED_IN", direction = Relationship.INCOMING)
+	  Set<Person> actors = new HashSet<>();
+	}
+
+
+Set application.yml  see [connector guidelines](https://neo4j.com/docs/operations-manual/current/configuration/connectors/)
+
+	dbms:
+		connector:
+			bolt:
+				listen_address: ${neo4jEP:localhost7687}
+	spring:
+		data:
+			neo4j:
+				username: ${username:neo4j}
+				password: ${password:secret}
+			repositories:
+				enabled: ${esrepos:true}
+
+Use repository
+
+	@Autowired
+	MovieRepository repo;
+	
+	List<Movie> movie = repo.findByTitle("The Matrix");
+
+	Iterable<Rating> ratings = repo.getRatings(movieId);
 
 ### Fuseki
 
