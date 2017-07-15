@@ -189,6 +189,8 @@ Add dependency
 
 Add interface
 
+	import org.springframework.data.neo4j.repository.GraphRepository;
+	
 	interface MovieRepository extends GraphRepository<Movie> {
 
 	  @Query("MATCH (m:Movie)<-[rating:RATED]-(user)
@@ -200,6 +202,10 @@ Add interface
 	
 Add model
 
+	import org.springframework.data.neo4j.annotation.NodeEntity;
+	import org.springframework.data.neo4j.annotation.GraphId;
+	import org.springframework.data.neo4j.annotation.Relationship;
+	
 	@NodeEntity
 	public class Movie {
 
@@ -219,7 +225,7 @@ Set application.yml  see [connector guidelines](https://neo4j.com/docs/operation
 	dbms:
 		connector:
 			bolt:
-				listen_address: ${neo4jEP:localhost7687}
+				listen_address: ${neo4jEP:localhost:7687}
 	spring:
 		data:
 			neo4j:
@@ -239,7 +245,80 @@ Use repository
 
 ### Fuseki
 
-Ok I could not find the crud version for fuseki.  But the auto inject is similar.  You'll have to manually create a the client. This example only uses a select query. In executeSelectQuery method(), it uses a jdk8 feature called lamda which have the arrow pointer in the code to pass an a processQuerySolution method from an internal interface.
+Well I could not find a spring boot start for fuseki.  but here is what I imagine it would look like.  It would handle a SPARQL query and pass back models constructed by transforming the SPQARQL query results according to the model's annotations and annotations's parameters.
+
+Add dependency
+
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-data-fuseki</artifactId>
+	</dependency>
+
+
+Add interface
+
+	import org.springframework.data.fuseki.repository.PetstoreRepository;
+	
+	interface MovieRepository extends PetstoreRepository<Dog> {
+
+	  @Query("CONSTRUCT (d:Dog)<-[$dogId, rdf:type, breed:LABRADOR_RETRIEVER ]-(user)
+		  WHERE id(d.subject) = {dogId} RETURN breed")
+	  Iterable<Breed> getBreeds(@Param("dogID") Long dogId);
+
+	  List<Dog> findByName(String name);
+	}
+	
+Add model
+
+	import org.springframework.data.fuseki.annotation.TripleEntity;
+	import org.springframework.data.fuseki.annotation.AnonymousId;
+	import org.springframework.data.fuseki.annotation.Uri;
+	import org.springframework.data.fuseki.annotation.Literal;
+	import org.springframework.data.fuseki.annotation.Relationship;
+	
+	@TripleEntity
+	public class Dog {
+
+	  @AnonymousId
+	  Long id;
+
+	  @Literal
+	  String name;
+
+	  @Uri
+	  Person owner;
+
+	  @Relationship(type="owl:BRED_FROM", direction = Relationship.INCOMING)
+	  Set<Breed> breeds = new HashSet<>();
+	}
+
+
+Set application.yml  see [Fuseki Configuration](https://jena.apache.org/documentation/fuseki2/fuseki-configuration.html)
+
+	fuseki:
+		connector:
+			bolt:
+				listen_address: ${fusekiEP:http://localhost:3030/ds}
+	spring:
+		data:
+			fuseki:
+				username: ${username:neo4j}
+				password: ${password:secret}
+			repositories:
+				enabled: ${fusrepos:true}
+
+Use repository
+
+	@Autowired
+	DogRepository repo;
+	
+	List<Dog> dogs = repo.findByName("Spud");
+
+	Iterable<Breed> breeds = repo.getBreeds(dogId);
+
+### Fuseki Manually
+
+Here is the manually way to doing it.  The auto inject is similar using an autowire.  It does not have all of the fancy annotation to find the guts of the code.  You'll have to manually create a the client. This example only uses a select query. In executeSelectQuery method(), it uses a jdk8 feature called lamda which have the arrow pointer in the code to pass an a processQuerySolution method from an internal interface.
 
 Add Jena fuskei dependencies.
 	
