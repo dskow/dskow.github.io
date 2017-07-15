@@ -1,11 +1,9 @@
-Background
-==========
+# Background
 
 This guide will discuss how to setup a development environment for build
 mobile apps with Visual Studio, Xamarin.
 
-Resources
-=========
+# Resources
 
 You will need a Windows 10 Creators edition computer, a current macbook
 computer with latest IOS, and network access on both.
@@ -65,9 +63,9 @@ Check the boxes for:
 
 1.  Windows 10 Mobile Emulator (Creators Update),
 
-2.  Universal Windows Platform tools for Xamarin.
+2.  Universal Windows Platform tools for Xamarin,
 
-3.  Visual Studio Emulator for Android
+3.  Visual Studio Emulator for Android.
 
 If you want to store on GitHub select that under individual components.
 
@@ -80,15 +78,15 @@ Development
 
 This will include the following:
 
-1.  Blend for Visual Studio
+1.  Blend for Visual Studio,
 
-2.  .NET Native
+2.  .NET Native,
 
-3.  NuGet Package Manager
+3.  NuGet Package Manager,
 
-4.  Universal Windows Platform tools
+4.  Universal Windows Platform tools,
 
-5.  Windows 10 SDK (10.0.15063.0) for UWP: C\#, VB, JS
+5.  Windows 10 SDK (10.0.15063.0) for UWP: C\#, VB, JS.
 
 You can always install components again. Just run the setup app again.
 
@@ -99,8 +97,7 @@ same time. While VS2017 setup was in the acquiring phase.
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image5.png" width="624" height="348" />
 
-Install Android Emulator Manager
-================================
+# Install Android Emulator Manager
 
 The Android Emulator Manager (AEM) controls the installation of the
 various android phone emulators for Hyper-v. In the Visual Studio 2017
@@ -144,8 +141,7 @@ By default there is no internet access.
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image12.png" width="333" height="592" />
 
-Turn on internet access for emulator
-====================================
+# Turn on internet access for emulator
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image13.png" width="387" height="104" />
 
@@ -153,8 +149,7 @@ Turn on internet access for emulator
 
 If you are still running the emulator stop it by closing the window.
 
-Create an Internet connection
-=============================
+# Create an Internet connection
 
 In hyper-v, right click your computer and choose Virual Switch Manager,
 
@@ -236,8 +231,7 @@ The created project will contain four projects.
 
 You should be able to build and run each on the emulators.
 
-Windows Phone Emulation
-=======================
+# Windows Phone Emulation
 
 The Windows Phone will look like this.
 
@@ -251,8 +245,7 @@ The Windows Phone will look like this.
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image35.png" width="322" height="569" />
 
-iPhone Emulation
-================
+# iPhone Emulation
 
 The iPhone will look like this.
 
@@ -268,8 +261,7 @@ installed.
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image37.png" width="325" height="578" />
 
-Android Phone Emulation
-=======================
+# Android Phone Emulation
 
 The Android Phone will look like this.
 
@@ -282,8 +274,7 @@ will appear. Click Yes.
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image40.png" width="333" height="592" />
 
-Installing Bash for Windows
-===========================
+# Installing Bash for Windows
 
 <img src="https://github.com/dskow/dskow.github.io/blob/master/_posts/media/image41.png" width="624" height="553" />
 
