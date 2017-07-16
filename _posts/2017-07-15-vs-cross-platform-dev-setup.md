@@ -1,18 +1,18 @@
 # Background
 
-This guide will discuss how to setup a development environment for build
-mobile apps with Visual Studio, Xamarin.
+This guide will discuss how to setup a development environment for building
+mobile apps with Visual Studio and Xamarin.
 
 # Resources
 
 You will need a Windows 10 Creators edition computer, a current macbook
-computer with latest IOS, and network access on both.  You may have to install JDK 8 before VS2017. JDK8 is used in the macbook agent.
+computer with latest iOS 10.3, and network access on both.  You may have to install JDK 8 before VS2017. JDK8 is used in the macbook agent.
 
 Launch VS2017 setup.
 
 <img src="https://dskow.github.io/media/image1.png" width="624" height="348" />
 
-Select the “Mobile Development with .NET” and "Universal Windows Platform development" Workloads.
+Select the “Mobile Development with .NET” and "Universal Windows Platform development" workloads.
 
 <img src="https://dskow.github.io/media/image2.png" width="624" height="348" />
 
@@ -43,7 +43,7 @@ Select the “Mobile Development with .NET” and "Universal Windows Platform de
 5.  Windows 10 SDK (10.0.15063.0) for UWP: C\#, VB, JS.
 
 Don't use HAXM. The Hyper-V works for both windows and android phone emulation. The default HAXM method only works for Android phone emulation. The iphone emulator only runs on the macbook, but it can be deployed and launched from Visual Studio 2017 on
-the windows machine. Iphone emulator requires matching versions between VS and the macbook Xamarin software.
+the windows machine. Iphone emulator requires matching versions between Visual Studio and the Macbook Xamarin software.
 
 Uncheck the boxes for:
 
@@ -58,7 +58,7 @@ Check the boxes for:
 4. Windows 10 SDK (10.0.10586.0),
 5. GitHub extension for Visual Studio
 
-We get the 10.0.10586.0 module since the default minimal version used in the VS project wizard is that version of Windows 10.
+The 10.0.10586.0 module matches the default minimal version used in the VS project wizard.
 
 You can always install components again. Just run the setup app again.
 
@@ -69,7 +69,7 @@ You can always install components again. Just run the setup app again.
 # Using Android Emulator Manager
 
 The Android Emulator Manager (AEM) controls the installation of the
-various android phone emulators for Hyper-v. When you install one from the manager it will appear in the Visual Studio dropdown. Hyper-v is microsoft’s visualization manager. It is similar to Oracle’s VirtualBox, and VMware.  I don't think they work together so you may have to uninstall those to get hyper-v working.
+various android phone emulators for Hyper-v. When you install one from the manager, it will appear in the Visual Studio dropdown. Hyper-v is microsoft’s visualization manager. It is similar to Oracle’s VirtualBox, and VMware.  I don't think they work together so you may have to uninstall those to get hyper-v working.
 
 see <https://www.visualstudio.com/vs/msft-android-emulator/>
 
@@ -85,16 +85,15 @@ This installs within a few minutes.
 
 <img src="https://dskow.github.io/media/image7.png" width="395" height="150" />
 
-3. Filter the Device Profiles by choosing Marshmallow API 23
+3. Filter the Device Profiles by choosing Marshmallow API 23 which is the most current that the manager has.
 
 <img src="https://dskow.github.io/media/image8.png" width="624" height="587" />
 
-4. Click the download button to right of 5.7” Marchsmallow.
+4. Click the download button to right of 5.7” Marshmallow.
 
 <img src="https://dskow.github.io/media/image9.png" width="624" height="89" />
 
-This will take a while to download. A dialog access window will appear
-late in the install to do the actual install.
+This will take a while to download. A dialog access window will appear late in the install to do the actual install.
 
 <img src="https://dskow.github.io/media/image10.png" width="623" height="66" />
 
@@ -102,8 +101,7 @@ late in the install to do the actual install.
 
 <img src="https://dskow.github.io/media/image11.png" width="624" height="86" />
 
-By default there is no internet access.
-
+By default there is no internet access in the emulator.
 
 # Internet access for emulator
 
@@ -121,12 +119,11 @@ You may need to run you emulator and have it talk to the internet.
 
 <img src="https://dskow.github.io/media/image14.png" width="428" height="171" />
 
-4. In hyper-v, right click your computer and choose Virual Switch Manager,
+4. In hyper-v, right click your computer name and choose Virual Switch Manager,
 
 <img src="https://dskow.github.io/media/image15.png" width="448" height="170" />
 
-5. Click Create Virtual Switch and give it a name like “Internet Virtual
-Switch”. Click yes to warning.
+5. Click Create Virtual Switch and give it a name like “Internet Virtual Switch”. Click yes to warning.
 
 <img src="https://dskow.github.io/media/image16.png" width="527" height="384" />
 
@@ -140,13 +137,13 @@ Switch”. Click yes to warning.
 
 <img src="https://dskow.github.io/media/image18.png" width="436" height="97" />
 
-9. Relaunch emulator and verify internet.
+9. Relaunch the emulator and verify internet.
 
 <img src="https://dskow.github.io/media/image19.png" width="485" height="864" />
 
 # Run Visual Studio
 
-Now that everything is setup, Visual Studio 2017 can be started.  The first time will ask for a sign in account which will:
+The first time starting Visual Studio 2017 will ask for an account which will:
 
 1. Provide the licensing of the versions of Visual Studio Professional and higher,
 2. Link your Visual Studio to visual studio online,
@@ -159,29 +156,18 @@ Choose the Team Explorer Tab in lower right corner of main window.
 
 <img src="https://dskow.github.io/media/image21.png" width="350" height="155" />
 
-They show a welcome message. Welcome to GitHub for Visual Studio! Why
-not take a look at our training or documentation?
-
-The training link is
-<https://services.github.com/on-demand/windows/visual-studio>
-
-And the documentation link is
+Welcome to GitHub for Visual Studio! Why not take a look at our training or documentation? The training link is <https://services.github.com/on-demand/windows/visual-studio> and the documentation link is
 <https://github.com/github/VisualStudio/tree/master/docs>
 
-After logging into a GitHub project to store your app, click new
-solution.
+After logging into a GitHub project to store your app, click new solution.
 
 <img src="https://dskow.github.io/media/image22.png" width="624" height="432" />
 
-Choose the 4.6.2 Framework, Cross Platform App(Xamarin) and give it a
-name.
+Choose the 4.6.2 Framework, Cross Platform App(Xamarin) and give it a name.
 
 <img src="https://dskow.github.io/media/image23.png" width="624" height="342" />
 
-Choose either Shared Project or PCL. The difference is PCL creates a dll
-that is used in the other projects. Shared project shares the code with
-the other projects. If you want to use skiasharp and match closely with
-the Skiasharp demo code, Skiasharp uses PCL.
+Choose either Shared Project or PCL. The difference is PCL creates a dll that is used in the other projects. Shared project shares the code with the other projects. If you want to use skiasharp and match closely with the Skiasharp graphical demo code, Skiasharp uses PCL.
 
 <img src="https://dskow.github.io/media/image24.png" width="624" height="451" />
 
@@ -189,8 +175,7 @@ You will need to allow access for VS2017 program to the network.
 
 <img src="https://dskow.github.io/media/image25.png" width="303" height="158" />
 
-Install any updates that appear in Notifications. This update required
-me to close VS for it to install.
+Install any updates that appear in Notifications. The github plugin update required me to close VS for it to install.
 
 <img src="https://dskow.github.io/media/image26.png" width="624" height="472" />
 
@@ -202,11 +187,11 @@ Choose File-&gt;New-&gt;Project…
 
 <img src="https://dskow.github.io/media/image29.png" width="624" height="254" />
 
-The created project will contain four projects.
+The created solution will contain four projects.
 
 <img src="https://dskow.github.io/media/image30.png" width="346" height="179" />
 
-You should be able to build and run each on the emulators.
+You should be able to build and run the app on each phone emulator.
 
 # Windows Phone Emulation
 
@@ -214,52 +199,36 @@ The Windows Phone will look like this.
 
 <img src="https://dskow.github.io/media/image31.png" width="624" height="44" />
 
+A warning about download before running may appear since the Xamarin solution wizard default settings for all cpu do not build and deploy UWP. 
+
 <img src="https://dskow.github.io/media/image32.png" width="624" height="331" />
+
+If you see a deploy warning, you need to modify the configuration manager.
 
 <img src="https://dskow.github.io/media/image33.png" width="624" height="454" />
 
+A startup window will take a while to start the emulator on the first deployment after a computer reboot.  Other deployments will happen much faster it the emulator is already running.
+
 <img src="https://dskow.github.io/media/image34.png" width="320" height="569" />
+
+The windows phone starter app looks like the following image.
 
 <img src="https://dskow.github.io/media/image35.png" width="322" height="569" />
 
 # iPhone Emulation
 
-The iPhone will look like this.
+The iPhone will run options look like this.
 
 <img src="https://dskow.github.io/media/image36.png" width="563" height="42" />
 
-Then look on your macbook. The emulator should appear and the app should
-have the following.
-
-To Save a screen shot, select File-&gt;Save ScreenShot. Then yous scp to
+The macbook will contain the emulator for iPhone. The emulator should appear and the app.  To Save a screen shot, select File-&gt;Save ScreenShot. Then yous scp to
 securely copy the file from the macbook to the windows computer. The
 command is from windows powershell. You will need bash for Windows
 installed.
 
 <img src="https://dskow.github.io/media/image37.png" width="325" height="578" />
 
-# Android Phone Emulation
-
-The Android Phone will look like this.
-
-<img src="https://dskow.github.io/media/image38.png" width="623" height="39" />
-
-<img src="https://dskow.github.io/media/image39.png" width="434" height="213" />
-
-When running the Android emulator, a warning about internet connection
-will appear. Click Yes.
-
-<img src="https://dskow.github.io/media/image40.png" width="333" height="592" />
-
-# Installing Bash for Windows
-
-<img src="https://dskow.github.io/media/image41.png" width="624" height="553" />
-
-Reboot computer.
-
-Run bash from command line.
-
-<img src="https://dskow.github.io/media/image42.png" width="624" height="354" />
+## Getting iPhone Screenshots from the Macbook.
 
 Use the secure copy command to copy the screenshot from the macbook to
 the windows computer.
@@ -290,3 +259,32 @@ Here is the full output of what to expect.
     00:00
 
 You now have access to the iphone screenshots in your Pictures folder.
+
+# Android Phone Emulation
+
+The Android Phone run options will look like this.
+
+<img src="https://dskow.github.io/media/image38.png" width="623" height="39" />
+
+It may warn about internet access.  Click Yes to the warning.
+
+<img src="https://dskow.github.io/media/image39.png" width="434" height="213" />
+
+The android starter app will look like the following image.
+
+<img src="https://dskow.github.io/media/image40.png" width="333" height="592" />
+
+# Installing Bash for Windows
+
+You may need bash to transfer screenshots from the macbook.
+
+1. There is a windows feature to install.
+
+<img src="https://dskow.github.io/media/image41.png" width="624" height="553" />
+
+2. A computer reboot is required.
+
+3. Run bash from command line.
+
+<img src="https://dskow.github.io/media/image42.png" width="624" height="354" />
+
