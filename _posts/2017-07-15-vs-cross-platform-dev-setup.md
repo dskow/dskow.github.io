@@ -221,7 +221,7 @@ The iPhone will run options look like this.
 
 <img src="https://dskow.github.io/media/image36.png" width="563" height="42" />
 
-The macbook will contain the emulator for iPhone. The emulator should appear and the app.  To Save a screen shot, select File-&gt;Save ScreenShot. Then yous scp to
+The macbook will contain the emulator for iPhone. The emulator should appear and the app.  To Save a screen shot, select File-&gt;Save ScreenShot. Then use scp to
 securely copy the file from the macbook to the windows computer. The
 command is from windows powershell. You will need bash for Windows
 installed.
