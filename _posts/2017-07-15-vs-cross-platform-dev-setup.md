@@ -77,8 +77,6 @@ see <https://www.visualstudio.com/vs/msft-android-emulator/>
 
 <img src="https://dskow.github.io/media/image6.png" width="617" height="864" />
 
-<img src="https://dskow.github.io/media/image6.png" width="617" height="864" />
-
 This installs within a few minutes.
 
 2. Start the Android Emulator
