@@ -1,5 +1,3 @@
-# Background
-
 This guide will discuss how to setup a development environment for building
 mobile apps with Visual Studio and Xamarin.
 
