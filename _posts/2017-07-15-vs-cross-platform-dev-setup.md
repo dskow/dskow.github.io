@@ -286,3 +286,8 @@ You may need bash to transfer screenshots from the macbook.
 
 <img src="https://dskow.github.io/media/image42.png" width="624" height="354" />
 
+# Updating and Install dependencies with NuGet
+
+This section was added Oct 18, 2017.
+
+Nuget is a visual studio component that will manage many of your 3rd party reference libraries. To use Nuget, right click on the solution and select "Manage NuGet packages for Solution".  Many packages are installed by default when you create a solution from a wizard.  The Xamarin.Android.Support.xxxxxx packages from the cross-platform wizard can be upgraded to 26.0.2 only if you update your visual studio to 15.4.0 (see help->about to find VS2017 version).  If you try on some earlier VS2017 version, you get a failure and rollback.
