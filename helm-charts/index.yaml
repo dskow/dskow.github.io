@@ -1,0 +1,18 @@
+apiVersion: v1
+entries:
+  rampart-tetragon:
+  - apiVersion: v1
+    appVersion: 0.0.6
+    created: "2024-04-18T11:26:26.791570074Z"
+    description: Tetragon monitor adapter for Rampart Container Runtime Security sensor
+    digest: be2a674cc0bb228afd26701ce214996e786ba0716b60b918489282e15b377ede
+    keywords:
+    - monitor
+    - tetragon
+    - security
+    name: rampart-crs
+    sources:
+    - https://github.com/dskow/rampartai/harbor-scanner-aqua
+    urls:
+    - https://github.com/dskow/rampartai/helm-charts/releases/download/rampart-tetragon-0.0.6/rampart-tetragon-0.0.6.tgz
+    version: 0.0.6
