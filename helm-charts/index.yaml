@@ -14,5 +14,5 @@ entries:
     sources:
     - https://github.com/dskow/rampartai/harbor-scanner-aqua
     urls:
-    - https://github.com/dskow/helm-charts/releases/download/rampart-tetragon-0.0.6/rampart-tetragon.tgz
+    - https://github.com/dskow/helm-charts/releases/download/rampart-tetragon-0.0.6/rampart-tetragon-0.0.6.tgz
     version: 0.0.6
