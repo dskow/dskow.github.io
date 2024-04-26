@@ -3,9 +3,9 @@ entries:
   rampart-tetragon:
   - apiVersion: v1
     appVersion: 0.0.8
-    created: "2024-04-26T10:55:55.456774681Z"
+    created: "2024-04-26T11:59:59.830087590Z"
     description: Tetragon monitor adapter for Rampart Container Runtime Security sensor
-    digest: 5f8cf3ce66ea3b807206020b90a1160803cf9dfdd60d8642aa49620c10afd636
+    digest: 0dc2c374d74dd5d97ba1e9c6b956fe1efa9aef970fa706a143ebb9708be70ac7
     keywords:
     - monitor
     - tetragon
