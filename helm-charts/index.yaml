@@ -2,10 +2,10 @@ apiVersion: v1
 entries:
   rampart-tetragon:
   - apiVersion: v1
-    appVersion: 0.0.6
-    created: "2024-04-18T11:26:26.791570074Z"
+    appVersion: 0.0.8
+    created: "2024-04-26T10:55:55.456774681Z"
     description: Tetragon monitor adapter for Rampart Container Runtime Security sensor
-    digest: be2a674cc0bb228afd26701ce214996e786ba0716b60b918489282e15b377ede
+    digest: 5f8cf3ce66ea3b807206020b90a1160803cf9dfdd60d8642aa49620c10afd636
     keywords:
     - monitor
     - tetragon
@@ -14,5 +14,5 @@ entries:
     sources:
     - https://github.com/dskow/rampart-tetragon
     urls:
-    - https://github.com/dskow/helm-charts/releases/download/rampart-tetragon-0.0.6/rampart-tetragon-0.0.6.tgz
-    version: 0.0.6
+    - https://github.com/dskow/helm-charts/releases/download/rampart-tetragon-0.0.8/rampart-tetragon-0.0.8.tgz
+    version: 0.0.8
