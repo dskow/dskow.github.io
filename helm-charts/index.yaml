@@ -15,3 +15,5 @@ entries:
     - https://github.com/dskow/rampart-tetragon
     urls:
     - https://github.com/dskow/helm-charts/releases/download/rampart-tetragon-0.0.9/rampart-tetragon-0.0.9.tgz
+    version: 0.0.8
+    
