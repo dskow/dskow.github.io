@@ -10,7 +10,7 @@ entries:
     - monitor
     - tetragon
     - security
-    name: rampart-crs
+    name: rampart-tetragon
     sources:
     - https://github.com/dskow/rampart-tetragon
     urls:
