@@ -4,25 +4,24 @@
 # which you are expected to set up once and rarely need to edit after that.
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # 'jekyll serve'. If you change this file, please restart the server process.
-theme: jekyll-theme-midnight
 
 # Site settings
 title: Dskow Blog
 email: david@dskow.com
 description: >
-  Cross platform phone app and web ui development using web technologies.
-logo: "/assets/images/logo.jpg"
+  Notes on backend engineering, distributed systems, and cloud-native development.
+logo: "/assets/images/logo.png"
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://dskow.com" # the base hostname & protocol for your site
+url: "https://dskow.com" # the base hostname & protocol for your site
 paginate:	5 # The number of posts to show per page on your homepage
 
 name: 'David Skowronski'
 bio: >
-  Mea suas vituperatoribus et, virtute corpora quaestio cum ut.
-  Ne solet nostrum complectitur pri, vis ut inani populo.
+  Senior backend engineer building distributed systems, event-driven pipelines,
+  and scalable APIs. 26+ years across telecom, defense, IoT, and AI security.
 author_image: "/assets/images/author.jpg"
-twitter_username: jekyllrb
-github_username:  jekyll
+twitter_username: dskowFL
+github_username: dskow
 
 # Google Analytics
 analytics_id: ""
@@ -33,5 +32,5 @@ markdown: kramdown
 kramdown:
   parse_block_html: true
 
-gems:
+plugins:
   - jekyll-paginate
