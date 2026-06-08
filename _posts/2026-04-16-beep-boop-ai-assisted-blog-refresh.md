@@ -7,15 +7,15 @@ Beep Boop Beep Boop... We have entered the age of AI-assisted coding.
 
 It started last year with copy-and-paste between Microsoft Copilot or one of the other 100 or so LLM flavors.  I would pull code out of a chat session, drop it into my codebase, tweaked it, tested it, and (9 times out of 10) watched it fail.  Then, I'd paste the failure back into the chat and iterate until it works.  Each loop, the AI would always come back and say something like: "Of course that won't work.  Here is how to actually do it."
 
-This year is different. Agentic workflows let the assistant act on the system directly — reading files, running commands, editing in place.  It can even operate applications with MCP tools.  Agents see code and various tool output through shell tools like `grep`, `sed`, and `awk`. Fine for structured text, but it leaves the AI with a kind of data blindness — to visual layout, a broken image, the feel of a paragraph, things a human catches at a glance. Humans have the opposite blindness. We can't hold the volume an AI scans without effort, or the cross-file patterns it keeps in working memory.
+This year is different. Agentic workflows let the assistant act on the system directly by reading files, running commands, and editing in place.  It can even operate applications with MCP tools.  Agents see code and various tool output through shell tools like `grep`, `sed`, and `awk`. Fine for structured text, but it leaves the AI with a kind of data blindness to visual layout, a broken image, the feel of a paragraph, and other things that a human catches at a glance. Humans have the opposite blindness. We can't hold the volume an AI scans without effort, or the search by patterns it keeps in working memory.
 
 Put both in the loop, and the whole picture shows up.
 
-This blog is the test case. It hadn't seen a new post since December 2018 — dead images, a stale theme config, a `Gemfile.lock` carrying six years of unpatched CVEs.
+This blog is the test case. It hadn't seen a new post since December 2018 with dead images, a stale theme config, and a `Gemfile.lock` carrying six years of unpatched CVEs.
 
-Thanks, Claude, for pointing that out — jeez. Not making any promises about frequency, either.  No need to write the same thing millions of other people wrote.
+Thanks, Claude, for pointing that out.  jeez. Not making any promises about frequency, either.  No need to write the same thing millions of other people wrote.
 
-I brought it back in one session with Claude Code. From here, let me just show you how the conversation actually went — lightly edited, same rhythm. Ironically, it chose to change "cherry-picked" with "lightly edited" since it was slightly negative.
+I brought it back in one session with Claude Code. From here, let me just show you how the conversation actually went but lightly edited and with same rhythm. Ironically, it chose to change "cherry-picked" with "lightly edited" since it was slightly negative. Also, it places em dashes everywhere. 
 
 <amp-img width="1440" height="816" layout="responsive" src="/assets/images/hero.jpg" alt="Abstract distributed systems network"></amp-img>
 
@@ -29,26 +29,26 @@ I brought it back in one session with Claude Code. From here, let me just show y
 
 **Claude:** *[reads the repo, git state, config, posts, dependencies]*
 
-> - Theme declared as `jekyll-theme-midnight` in `_config.yml`, but the repo contains the Amplify AMP theme's own layouts — silent conflict.
+> - Theme declared as `jekyll-theme-midnight` in `_config.yml`, but the repo contains the Amplify AMP theme's own layouts which is a silent conflict.
 > - Broken image references in `README.md` from prior file deletions.
 > - `_config.yml` placeholder values (`twitter_username: jekyllrb`, lorem-ipsum bio).
 > - `about.md` hero image pointing at defunct `lorempixel.com`.
 > - A single `helm-charts/index.yaml` colocated in a personal blog repo.
-> - `Gemfile` listed `gem 'Midnight'` — a gem that does not exist on rubygems.org.
+> - `Gemfile` listed `gem 'Midnight'` which is a gem that does not exist on rubygems.org.
 
-Six issues ordered by blast radius. Each became its own small ticket — "why it matters, options, action" — rather than one open-ended "fix the blog" prompt. That framing fits LLM tools better than anything else I've tried.
+Six issues ordered by blast radius. Each became its own small process to: answer why it matters, give options, and take action. This approach was taken instead of one open-ended "fix the blog" prompt. That framing fits LLM tools better than anything else I've tried.
 
 ## Mix AI image generation with deterministic code generation
 
 **David:** Help me create a cool hero image for the page.
 
-**Claude:** *[proposed SVG, 3D render via Blender, stock photo, and Leonardo.ai — recommended Leonardo for polish]*
+**Claude:** *[proposed SVG, 3D render via Blender, stock photo, and Leonardo.ai. then, recommended Leonardo for polish]*
 
 I used [Leonardo.ai](https://leonardo.ai) with FLUX.2 Pro, Ray Traced style, and the prompt we settled on:
 
 > Dark abstract tech hero banner, distributed computing concept, glowing network nodes connected by flowing data streams, deep navy and teal palette, cinematic lighting, wide landscape composition.
 
-One 1440×816 image — the one above. Then the 48×48 favicon and logo:
+One 1440×816 image which is the one above. Then the 48×48 favicon and logo:
 
 **David:** Let's create a cool logo for Dskow Publishing LLC 48x48 image for this page.
 
@@ -79,7 +79,7 @@ The split is deliberate. **AI image generation for creative pieces; code generat
 
 **Claude:** Pumping the brakes before I do anything destructive. A few things to sort out first...
 
-*[laid out the blast radius — existing release URLs, potential downstream `helm repo add` users, the fact that `dskow/helm-charts` already existed — and proposed a phased cutover]*
+*[laid out the blast radius by the following areas: existing release URLs, potential downstream `helm repo add` users, the fact that `dskow/helm-charts` already existed. Then, I proposed a phased cutover]*
 
 **David:** The helm charts were only used in a demo I did. So, preserving the old command is not needed.
 
@@ -109,13 +109,13 @@ Earlier in the session we had deleted a six-year-old `Gemfile.lock` while troubl
 > | jekyll | < 3.6.3 | 4.4.1 | patched |
 > | ffi | < 1.9.24 | 1.17.4 | patched |
 
-Six historical alerts went from "open" to "fixed" in a single push — not because we did a security audit, but because regenerating from `Gemfile` picked up patched versions by default. For sites that bit-rot between updates, `rm Gemfile.lock && bundle install` is a legitimate one-liner.
+Six historical alerts went from "open" to "fixed" in a single push by regenerating from `Gemfile` that picked up patched versions by default. For sites that bit-rot between updates, `rm Gemfile.lock && bundle install` is a legitimate one-liner.
 
 We then added a `.github/dependabot.yml` so future CVEs show up as PRs on their own.
 
 ## Two-commit discipline
 
-The site refresh produced two distinct concerns — general cleanup (config, branding, bio) and the helm-charts split. Claude proposed splitting them into two commits rather than one. I agreed. Clean git log:
+The site refresh produced two distinct concerns: general cleanup (config, branding, bio) and the helm-charts split. Claude proposed splitting them into two commits rather than one. I agreed. Clean git log:
 
 ```
 4f4ae4d  Add Dependabot config for automated dependency updates
@@ -129,13 +129,13 @@ Three commits, three concerns. The history stays navigable, and each change is r
 
 ## What actually changes
 
-AI-assisted development is not "write me an app" — that is a demo. In a real refactor, the assistant is most valuable as a **fast, structured collaborator**:
+AI-assisted development is not "write me an app". In a real refactor, the assistant is most valuable as a **fast, structured collaborator**:
 
 - Evaluates code with context, produces a prioritized list
 - Mixes tool modalities (image gen, code gen, shell, git) inside one conversation
 - Respects commit hygiene and permission boundaries
 - Drafts tedious boilerplate (commit messages, YAML config, README rewrites)
-- Flags what it cannot do — cross-repo operations that need human credentials, design choices that need opinion
+- Flags what it cannot do (ie. cross-repo operations that need human credentials and design choices that need opinion).
 
 The dialog above is edited. A live session has pauses, false starts, and the occasional "no, I meant the other file." But the shape of the collaboration is real — plain English on one side, structured execution on the other, verification both ways.
 
