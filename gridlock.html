@@ -510,36 +510,147 @@ var cpBusy = false, cpTimers = [];
 var hb = null;      // {rocks, K, cyc, tick, si}
 var hbBusy = false, hbTimers = [];
 
-/* ============ audio (all synthesized) ============ */
-var actx = null;
-function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state==="suspended") actx.resume(); return actx; }
-function tone(freq,dur,type,vol,when,slide){
+/* ============ audio (all synthesized — osc + filtered-noise engine into a compressor bus) ============ */
+var actx = null, master = null, noiseBuf = null;
+function audio(){
+  if(!actx){
+    try{
+      actx = new (window.AudioContext||window.webkitAudioContext)();
+      var comp = actx.createDynamicsCompressor();
+      comp.threshold.value = -18; comp.knee.value = 22; comp.ratio.value = 6;
+      comp.attack.value = 0.003; comp.release.value = 0.2;
+      master = actx.createGain(); master.gain.value = 0.9;
+      master.connect(comp); comp.connect(actx.destination);
+      var len = Math.floor(actx.sampleRate * 1.5);
+      noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for(var i=0;i<len;i++) d[i] = Math.random()*2-1;
+    }catch(e){}
+  }
+  if(actx && actx.state==="suspended") actx.resume();
+  return actx;
+}
+function tone(freq,dur,type,vol,when,slide,atk){
   var c = audio(); if(!c || muted) return;
   var t = c.currentTime + (when||0);
   var o = c.createOscillator(), g = c.createGain();
   o.type = type||"sine"; o.frequency.setValueAtTime(freq,t);
   if(slide) o.frequency.exponentialRampToValueAtTime(slide, t+dur);
   g.gain.setValueAtTime(0.0001,t);
-  g.gain.exponentialRampToValueAtTime(vol||0.15, t+0.012);
+  g.gain.exponentialRampToValueAtTime(vol||0.15, t+(atk||0.012));
   g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
-  o.connect(g); g.connect(c.destination);
+  o.connect(g); g.connect(master);
   o.start(t); o.stop(t+dur+0.05);
 }
-function sPickup(){ tone(660,0.05,"square",0.05); }
-function sDrop(){ tone(220,0.07,"triangle",0.12); tone(330,0.05,"triangle",0.06,0.02); }
-function sBlocked(){ tone(80,0.18,"sine",0.28,0,55); tone(160,0.06,"square",0.05); }
-function sUndo(){ tone(330,0.06,"triangle",0.08); tone(220,0.06,"triangle",0.08,0.06); }
-function sClick(){ tone(440,0.04,"square",0.04); }
-function sWhoosh(){ tone(500,0.28,"sawtooth",0.06,0,140); tone(260,0.22,"triangle",0.05,0,90); }
-function sTick(i){ tone(620+Math.min(i,10)*45,0.05,"square",0.07); }
-function sDepart(){ tone(110,0.45,"sawtooth",0.09,0,330); tone(440,0.1,"triangle",0.05,0.05); }
-function sLose(){ tone(392,0.25,"sawtooth",0.12); tone(311,0.3,"sawtooth",0.12,0.24); tone(233,0.55,"sawtooth",0.13,0.5); }
-function sWin(){
-  tone(440,0.14,"sawtooth",0.10); tone(554,0.14,"sawtooth",0.10);
-  tone(440,0.22,"sawtooth",0.10,0.22); tone(554,0.22,"sawtooth",0.10,0.22);
-  tone(90,0.9,"sawtooth",0.06,0.5,220);
+function noise(dur,vol,when,fType,f0,f1,Q,atk){
+  var c = audio(); if(!c || muted) return;
+  var t = c.currentTime + (when||0);
+  var src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  src.playbackRate.value = 0.9 + Math.random()*0.2;
+  var fl = c.createBiquadFilter(); fl.type = fType||"bandpass";
+  fl.frequency.setValueAtTime(f0||800,t);
+  if(f1) fl.frequency.exponentialRampToValueAtTime(f1, t+dur);
+  fl.Q.value = Q||1;
+  var g = c.createGain();
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol, t+(atk||0.015));
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  src.connect(fl); fl.connect(g); g.connect(master);
+  src.start(t, Math.random()*0.5); src.stop(t+dur+0.05);
+}
+/* real car horns are a dual-tone a rough third apart */
+function horn(dur,vol,when,base){
+  base = base||440;
+  tone(base,dur,"sawtooth",vol,when);
+  tone(base*1.26,dur,"sawtooth",vol*0.85,when);
+  tone(base*2,dur,"triangle",vol*0.3,when);
+}
+function engine(f0,f1,dur,vol,when){
+  tone(f0,dur,"sawtooth",vol,when,f1);
+  tone(f0/2,dur,"square",vol*0.5,when,f1/2);
+  noise(dur,vol*0.45,when,"lowpass",380,760,0.7);
+}
+function fanfare(when){
   var notes=[523,659,784,1047], i;
-  for(i=0;i<notes.length;i++) tone(notes[i],0.16,"triangle",0.12,0.9+i*0.11);
+  for(i=0;i<notes.length;i++){
+    tone(notes[i],0.2,"triangle",0.12,when+i*0.1);
+    tone(notes[i]*2,0.1,"sine",0.04,when+i*0.1);
+  }
+  notes.forEach(function(f){
+    tone(f,0.7,"triangle",0.07,when+0.46,0,0.03);
+    tone(f,0.7,"sine",0.05,when+0.46,0,0.03);
+  });
+  for(i=0;i<4;i++) tone(1568+i*262,0.14,"sine",0.035,when+0.6+i*0.08);
+}
+function gull(when){
+  tone(1500,0.16,"sine",0.045,when,950);
+  tone(1500*1.5,0.12,"sine",0.02,when,1400);
+}
+/* --- interaction sounds (variant-aware: cars on asphalt vs boats in water) --- */
+function sPickup(){
+  if(variant==="harbor"){
+    tone(85,0.1,"triangle",0.08,0,70);                    // rope creak
+    noise(0.09,0.035,0,"lowpass",520,260);                // small lap
+  } else {
+    tone(1150,0.02,"square",0.03);                        // handle click
+    tone(300,0.05,"triangle",0.09,0.005,240);             // latch
+    noise(0.03,0.025,0,"highpass",3200);
+  }
+}
+function sDrop(cells){
+  cells = cells||1;
+  if(variant==="harbor"){
+    noise(0.16+cells*0.03,0.11,0,"lowpass",950,240);      // sploosh
+    tone(560,0.07,"sine",0.05,0.04,300);                  // droplet
+    tone(90,0.12,"sine",0.09,0,70);                       // hull settle
+  } else {
+    noise(0.07+cells*0.025,0.1,0,"bandpass",950,480,1.3); // tire scrub
+    tone(150,0.08,"sine",0.13,0.01,95);                   // suspension thump
+  }
+}
+function sBlocked(){
+  if(variant==="harbor"){
+    tone(52,0.24,"sine",0.32,0,38);                       // deep hull thud
+    tone(200,0.05,"triangle",0.13,0.01,140);              // wood knock
+    horn(0.22,0.06,0.09,175);                             // low "bworp"
+  } else {
+    tone(68,0.16,"sine",0.3,0,44);                        // bumper thump
+    noise(0.05,0.08,0.005,"bandpass",2300,0,4);           // metallic clank
+    horn(0.11,0.07,0.09,370);                             // annoyed "meep"
+  }
+}
+function sUndo(){ tone(430,0.05,"triangle",0.07); tone(285,0.08,"triangle",0.07,0.05,235); }
+function sClick(){ tone(440,0.035,"square",0.035); tone(880,0.02,"sine",0.02); }
+/* --- carpool --- */
+function sWhoosh(){                                        // ignition + pull-out
+  noise(0.05,0.05,0,"bandpass",1600,900,2);                // tire chirp
+  engine(72,175,0.45,0.09,0.02);
+}
+function sTick(i){                                         // rider hops in: rising pentatonic marimba
+  var steps=[0,2,4,7,9], n=Math.min(i,14);
+  var f=523*Math.pow(2,(steps[n%5]+12*Math.floor(n/5))/12);
+  tone(f,0.1,"sine",0.11); tone(f*3,0.045,"sine",0.03);
+  tone(f/2,0.05,"triangle",0.04);
+}
+function sDepart(){                                        // full car drives home
+  engine(95,250,0.65,0.08,0);
+  tone(250,0.3,"sawtooth",0.03,0.62,165);                  // fading down the road
+  horn(0.07,0.055,0.12,494); horn(0.1,0.055,0.26,494);     // cheery double toot
+}
+function sLose(){                                          // sad trombone + dying engine
+  tone(392,0.3,"sawtooth",0.1,0,362);
+  tone(330,0.3,"sawtooth",0.1,0.28,305);
+  tone(262,0.55,"sawtooth",0.11,0.56,242);
+  tone(98,1.1,"sawtooth",0.08,0.7,58);
+  noise(1.0,0.04,0.7,"lowpass",300,90);
+}
+/* --- victory --- */
+function sWin(){                                           // honk-honk, burnout, fanfare
+  horn(0.13,0.1,0,440);
+  horn(0.22,0.1,0.2,440);
+  noise(0.12,0.07,0.45,"bandpass",1400,700,1.5);           // tire chirp
+  engine(85,230,0.8,0.07,0.5);
+  fanfare(0.95);
 }
 
 /* ============ shared helpers ============ */
@@ -703,7 +814,7 @@ function attachDrag(el, i){
       if(snapped !== startCoord){
         coords[i] = snapped;
         positionCar(i);
-        sDrop();
+        sDrop(Math.abs(snapped-startCoord));
         commitMove(i, startCoord, snapped);
       } else {
         positionCar(i);
@@ -771,12 +882,23 @@ function loadClassic(m, idx){
 /* ==================================================================== */
 /* ============================ HARBOR ================================ */
 /* ==================================================================== */
-function sCurrent(){ tone(420,0.55,"sine",0.06,0,110); tone(240,0.6,"triangle",0.05,0.05,70); }
-function sFoghorn(){
-  tone(98,0.6,"sawtooth",0.14); tone(147,0.6,"sawtooth",0.08);
-  tone(98,0.85,"sawtooth",0.14,0.75); tone(147,0.85,"sawtooth",0.08,0.75);
-  var notes=[523,659,784,1047], i;
-  for(i=0;i<notes.length;i++) tone(notes[i],0.16,"triangle",0.12,1.7+i*0.11);
+function sCurrent(){                                       // tide surge: wave builds, crests, washes out
+  noise(0.55,0.09,0,"lowpass",280,1100,0.7,0.2);
+  noise(0.7,0.075,0.4,"lowpass",1000,220,0.7,0.05);
+  tone(60,1.1,"sine",0.06,0,82,0.25);                      // deep swell underneath
+  noise(0.3,0.03,0.55,"highpass",3000,5000,0.7);           // spray
+}
+function foghornBlast(when,dur){                           // layered partials, slow attack, slight sag
+  tone(98,dur,"sawtooth",0.13,when,92,0.09);
+  tone(196,dur,"sawtooth",0.06,when,184,0.09);
+  tone(294,dur,"triangle",0.035,when,278,0.09);
+  noise(dur,0.03,when,"lowpass",240,160,0.7,0.09);         // breathy chuff
+}
+function sFoghorn(){                                       // two blasts, gulls, fanfare
+  foghornBlast(0,0.65);
+  foghornBlast(0.8,0.95);
+  gull(1.85); gull(2.1); gull(2.28);
+  fanfare(2.0);
 }
 /* Tide drift: boats aligned with the current drift 1 cell if the target is free,
    leaders first so convoys drift together. Mirrors the generator exactly. */
@@ -1333,7 +1455,8 @@ document.getElementById("btnSave").addEventListener("click", function(){
   lbMode = pendingKey.replace("cp_","").replace("hb_","");
   pendingEntry = null; pendingKey = null;
   renderLb();
-  tone(880,0.08,"sine",0.08); tone(1175,0.1,"sine",0.08,0.08);
+  tone(880,0.14,"sine",0.09); tone(1760,0.06,"sine",0.03);
+  tone(1175,0.2,"sine",0.09,0.1); tone(2350,0.08,"sine",0.03,0.1);
 });
 document.getElementById("nameInput").addEventListener("keydown", function(e){
   if(e.key==="Enter") document.getElementById("btnSave").click();
