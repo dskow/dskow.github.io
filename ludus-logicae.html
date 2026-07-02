@@ -1,0 +1,986 @@
+<title>Ludus Logicae — Roman Logic Puzzles</title>
+<style>
+  :root{
+    --stone:#EDE8DC; --stone2:#E4DECC; --panel:#F5F1E4; --cellbg:#FAF6EA;
+    --ink:#2B2118; --faint:#6E6250; --line:#C9C0A8; --rule:#B3A780;
+    --red:#A61E22; --red-dk:#7E1518; --bronze:#8A6A2F; --bronze-lt:#B08D45;
+    --verd:#3F7263; --verd-dk:#2E574B;
+    --disp: Georgia, 'Times New Roman', serif;
+    --body: 'Palatino Linotype', Palatino, Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 500px at 20% -10%, rgba(255,255,255,.55), transparent 60%),
+      linear-gradient(180deg, var(--stone) 0%, var(--stone2) 100%);
+    color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5;
+    min-height:100vh;
+  }
+  .caps{font-family:var(--disp); font-variant-caps:small-caps; letter-spacing:.14em}
+
+  /* ---------- header ---------- */
+  header{
+    border-top:10px solid var(--red);
+    box-shadow:inset 0 -1px 0 var(--rule);
+    background:linear-gradient(180deg,#F3EEDF,#EAE4D2);
+    padding:14px 22px 12px;
+    display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center; justify-content:space-between;
+  }
+  header::before{content:""; display:block; position:absolute}
+  .brand h1{
+    margin:0; font-family:var(--disp); font-weight:400; font-size:clamp(22px,3.4vw,32px);
+    letter-spacing:.22em; text-transform:uppercase;
+    color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.7), 0 -1px 0 rgba(43,33,24,.18);
+  }
+  .brand h1 .amp{color:var(--red)}
+  .brand .sub{margin:2px 0 0; font-size:12.5px; color:var(--faint); letter-spacing:.26em; text-transform:uppercase; font-family:var(--disp)}
+  .hctrl{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+  /* difficulty segmented control */
+  .seg{display:flex; border:1px solid var(--bronze); border-radius:2px; overflow:hidden; background:var(--panel)}
+  .seg button{
+    appearance:none; border:0; background:transparent; cursor:pointer; padding:7px 12px 6px;
+    font-family:var(--disp); color:var(--ink); border-left:1px solid var(--rule);
+    display:flex; flex-direction:column; align-items:center; gap:1px; min-width:72px;
+  }
+  .seg button:first-child{border-left:0}
+  .seg button .rn{font-size:15px; letter-spacing:.1em}
+  .seg button .lbl{font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint)}
+  .seg button.on{background:var(--red); color:#F6EFDF}
+  .seg button.on .lbl{color:#E8CFA9}
+  .seg button:focus-visible{outline:2px solid var(--verd); outline-offset:-2px}
+
+  .btn{
+    appearance:none; cursor:pointer; border:1px solid var(--bronze); background:var(--panel); color:var(--ink);
+    font-family:var(--disp); font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+    padding:9px 16px; border-radius:2px; box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+  }
+  .btn:hover{background:#EFE9D6}
+  .btn:focus-visible{outline:2px solid var(--verd); outline-offset:1px}
+  .btn.primary{background:var(--red); border-color:var(--red-dk); color:#F6EFDF}
+  .btn.primary:hover{background:var(--red-dk)}
+  .btn:disabled{opacity:.45; cursor:default}
+
+  /* ---------- layout ---------- */
+  main{display:flex; gap:22px; padding:20px 22px 48px; align-items:flex-start; max-width:1360px; margin:0 auto}
+  aside{flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:16px}
+  .board{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:14px}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--rule); border-radius:2px;
+    box-shadow:0 1px 3px rgba(43,33,24,.08);
+    padding:16px 18px;
+  }
+  .panel h2, .panel h3{
+    margin:0 0 8px; font-family:var(--disp); font-weight:400;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--bronze);
+    font-size:12px; display:flex; align-items:center; gap:10px;
+  }
+  .panel h2::after, .panel h3::after{content:""; flex:1; height:1px; background:var(--rule)}
+  .story-title{font-family:var(--disp); font-size:19px; letter-spacing:.06em; margin:0 0 6px}
+  .story p{margin:0; max-width:65ch; color:#443728; font-size:15px}
+
+  /* question */
+  .qtext{font-size:17px; margin:2px 0 12px; font-style:italic}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+  .chip{
+    appearance:none; cursor:pointer; border:1px solid var(--bronze); background:var(--cellbg);
+    font-family:var(--body); font-size:14.5px; padding:6px 14px; border-radius:999px; color:var(--ink);
+  }
+  .chip:focus-visible{outline:2px solid var(--verd); outline-offset:1px}
+  .chip.sel{background:var(--ink); color:#F3EDDD; border-color:var(--ink)}
+  .qrow{display:flex; gap:10px; align-items:center}
+  .qmsg{font-size:13.5px; color:var(--red); min-height:1.2em}
+  @keyframes shake{20%{transform:translateX(-4px)}45%{transform:translateX(4px)}70%{transform:translateX(-3px)}90%{transform:translateX(2px)}}
+  .shake{animation:shake .35s ease}
+  @media (prefers-reduced-motion: reduce){ .shake{animation:none} dialog{animation:none!important} }
+
+  /* clues */
+  .clues ol{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-direction:column}
+  .clues li{
+    display:flex; gap:10px; padding:7px 4px; cursor:pointer; border-top:1px dotted var(--line);
+    font-size:14.5px; align-items:baseline;
+  }
+  .clues li:first-child{border-top:0}
+  .clues li .num{
+    flex:0 0 34px; text-align:right; font-family:var(--disp); color:var(--bronze);
+    font-size:12.5px; letter-spacing:.06em;
+  }
+  .clues li.done{color:#A2947C; text-decoration:line-through; text-decoration-color:rgba(138,106,47,.55)}
+  .clues li:hover{background:rgba(138,106,47,.06)}
+  .clues .hint-note{margin:10px 0 0; font-size:12px; color:var(--faint)}
+
+  /* status bar */
+  .status{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+  .timer{
+    font-family:var(--disp); font-size:30px; letter-spacing:.06em; font-variant-numeric:tabular-nums;
+    padding:2px 14px; border:1px solid var(--rule); background:var(--panel); border-radius:2px; min-width:118px; text-align:center;
+  }
+  .badge{font-family:var(--disp); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint)}
+  .badge b{color:var(--ink); font-weight:400}
+  .pen{color:var(--red); font-family:var(--disp); font-variant-numeric:tabular-nums; font-size:13px; letter-spacing:.08em}
+  .spacer{flex:1}
+
+  /* ---------- grid ---------- */
+  .gridwrap{overflow-x:auto; padding-bottom:6px}
+  table.lg{border-collapse:collapse; margin:0 auto}
+  table.lg th, table.lg td{padding:0}
+  .lg .catlab{
+    background:var(--stone2); border:1px solid var(--rule);
+    font-family:var(--disp); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--bronze);
+    padding:4px 8px; text-align:center;
+  }
+  .lg .catlab.vert span{writing-mode:vertical-rl; transform:rotate(180deg); display:inline-block; padding:8px 2px}
+  .lg .itemlab{
+    background:var(--panel); border:1px solid var(--line);
+    font-family:var(--body); font-size:12.5px; color:var(--ink); white-space:nowrap;
+  }
+  .lg .itemlab.top span{writing-mode:vertical-rl; transform:rotate(180deg); display:block; margin:0 auto; padding:8px 0 6px; min-height:86px; text-align:left}
+  .lg .itemlab.top{width:var(--cell); max-width:var(--cell)}
+  .lg .itemlab.side{padding:0 10px; text-align:right}
+  .lg .corner{background:transparent; border:0}
+  :root{--cell:clamp(26px, 3.1vw, 34px)}
+  .lg td.cell{
+    width:var(--cell); height:var(--cell); min-width:var(--cell);
+    border:1px solid var(--line); background:var(--cellbg); cursor:pointer;
+    text-align:center; vertical-align:middle; font-size:calc(var(--cell)*.52); line-height:1;
+    user-select:none;
+  }
+  .lg td.cell:hover{background:#F1EAD3}
+  .lg td.cell:focus-visible{outline:2px solid var(--verd); outline-offset:-2px}
+  .lg td.cell.x{color:var(--red); font-size:calc(var(--cell)*.45)}
+  .lg td.cell.o{color:var(--verd)}
+  .lg td.cell.flash{background:#DCE9DF}
+  .lg .blkL{border-left:2px solid var(--bronze)}
+  .lg .blkT{border-top:2px solid var(--bronze)}
+  .lg .blkR{border-right:2px solid var(--bronze)}
+  .lg .blkB{border-bottom:2px solid var(--bronze)}
+  .legend{display:flex; gap:18px; justify-content:center; font-size:12.5px; color:var(--faint); margin-top:2px}
+  .legend .o{color:var(--verd)} .legend .x{color:var(--red)}
+
+  details.howto{border:1px solid var(--rule); border-radius:2px; background:var(--panel); padding:10px 16px}
+  details.howto summary{cursor:pointer; font-family:var(--disp); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--bronze)}
+  details.howto p{font-size:13.5px; max-width:70ch; color:#443728}
+
+  /* ---------- dialogs ---------- */
+  dialog{
+    border:1px solid var(--bronze); border-radius:2px; background:var(--panel); color:var(--ink);
+    box-shadow:0 12px 40px rgba(43,33,24,.35); padding:0; max-width:min(92vw,560px); width:100%;
+  }
+  dialog::backdrop{background:rgba(43,33,24,.45)}
+  .dlg-head{
+    background:var(--red); color:#F6EFDF; padding:12px 20px;
+    font-family:var(--disp); letter-spacing:.24em; text-transform:uppercase; font-size:15px; text-align:center;
+  }
+  .dlg-body{padding:18px 22px 22px}
+  .wreath{text-align:center; font-size:34px; margin:4px 0 2px}
+  .win-time{
+    text-align:center; font-family:var(--disp); font-size:44px; letter-spacing:.04em;
+    font-variant-numeric:tabular-nums; margin:2px 0 4px;
+  }
+  .win-detail{text-align:center; color:var(--faint); font-size:13.5px; margin:0 0 14px}
+  .win-detail .pen{font-size:13.5px}
+  .namerow{display:flex; gap:10px; justify-content:center; margin-bottom:6px}
+  .namerow input{
+    font-family:var(--body); font-size:16px; padding:8px 12px; border:1px solid var(--bronze);
+    background:var(--cellbg); color:var(--ink); border-radius:2px; width:220px;
+  }
+  .namerow input:focus-visible{outline:2px solid var(--verd)}
+  .dlg-actions{display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap}
+
+  /* leaderboard */
+  .lb-tabs{display:flex; border-bottom:1px solid var(--rule)}
+  .lb-tabs button{
+    appearance:none; flex:1; border:0; background:transparent; cursor:pointer; padding:10px 4px 8px;
+    font-family:var(--disp); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+    border-bottom:3px solid transparent;
+  }
+  .lb-tabs button.on{color:var(--red); border-bottom-color:var(--red)}
+  .lb-tabs button:focus-visible{outline:2px solid var(--verd); outline-offset:-2px}
+  table.lb{width:100%; border-collapse:collapse; font-size:14px}
+  table.lb th{
+    font-family:var(--disp); font-weight:400; font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--bronze); text-align:left; padding:10px 8px 6px; border-bottom:1px solid var(--rule);
+  }
+  table.lb td{padding:7px 8px; border-bottom:1px dotted var(--line); font-variant-numeric:tabular-nums}
+  table.lb td.rank{font-family:var(--disp); color:var(--bronze); width:44px}
+  table.lb tr.me td{background:rgba(63,114,99,.12)}
+  .lb-empty{text-align:center; color:var(--faint); padding:26px 10px; font-style:italic}
+  .lb-foot{display:flex; justify-content:space-between; align-items:center; margin-top:12px}
+  .lb-foot .clear{font-size:11px; letter-spacing:.14em; text-transform:uppercase; background:none; border:0; color:var(--faint); cursor:pointer; text-decoration:underline}
+
+  @media (max-width: 960px){
+    main{flex-direction:column}
+    aside{flex:1 1 auto; max-width:none; width:100%}
+    .board{width:100%}
+  }
+</style>
+
+<header>
+  <div class="brand">
+    <h1>Lvdvs <span class="amp">·</span> Logicae</h1>
+    <p class="sub">Logic Puzzles of Ancient Rome &nbsp;·&nbsp; SPQR</p>
+  </div>
+  <div class="hctrl">
+    <div class="seg" id="diffSeg" role="group" aria-label="Difficulty"></div>
+    <button class="btn" id="newBtn">New Puzzle</button>
+    <button class="btn" id="lbBtn">Cvrsvs Honorvm</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <section class="panel story">
+      <h2>The Tale</h2>
+      <p class="story-title" id="storyTitle"></p>
+      <p id="storyText"></p>
+    </section>
+
+    <section class="panel question">
+      <h3>The Qvestion</h3>
+      <p class="qtext" id="qText"></p>
+      <div class="chips" id="qChips"></div>
+      <div class="qrow">
+        <button class="btn primary" id="qSubmit">Declare Answer</button>
+        <span class="qmsg" id="qMsg"></span>
+      </div>
+    </section>
+
+    <section class="panel clues">
+      <h3>The Clves</h3>
+      <ol id="clueList"></ol>
+      <p class="hint-note">Click a clue to cross it off once used.</p>
+    </section>
+  </aside>
+
+  <section class="board">
+    <div class="status">
+      <div class="timer" id="timer">0:00</div>
+      <div class="badge">Rank · <b id="diffLabel"></b></div>
+      <span class="pen" id="penLabel"></span>
+      <div class="spacer"></div>
+      <button class="btn" id="clearBtn">Clear Grid</button>
+      <button class="btn" id="hintBtn">Oracle&nbsp;(+45s)</button>
+      <button class="btn" id="revealBtn">Reveal</button>
+    </div>
+
+    <div class="panel">
+      <div class="gridwrap" id="gridWrap"></div>
+      <div class="legend">
+        <span><span class="o">●</span> confirmed</span>
+        <span><span class="x">✕</span> eliminated</span>
+        <span>click a cell to cycle: blank → ✕ → ●</span>
+      </div>
+    </div>
+
+    <details class="howto">
+      <summary>How to Play</summary>
+      <p>Every puzzle has exactly one solution, and it can always be found by pure deduction — no guessing needed.
+      Each person in the tale matches exactly one item in every other category. Use the clues to mark the grid:
+      <strong style="color:var(--red)">✕</strong> where a pairing is impossible, <strong style="color:var(--verd)">●</strong> where it is certain.
+      Placing a ● automatically crosses off the rest of its row and column in that block.
+      When you know the answer to the question, declare it — a wrong declaration costs 30 seconds, and consulting the Oracle costs 45.
+      Fastest times enter the Cvrsvs Honorvm.</p>
+    </details>
+  </section>
+</main>
+
+<dialog id="winDlg">
+  <div class="dlg-head">Victoria</div>
+  <div class="dlg-body">
+    <div class="wreath">🏛️</div>
+    <div class="win-time" id="winTime"></div>
+    <p class="win-detail" id="winDetail"></p>
+    <div class="namerow">
+      <input id="nameInput" maxlength="20" placeholder="Your name, citizen" aria-label="Your name">
+    </div>
+    <div class="dlg-actions">
+      <button class="btn primary" id="saveScore">Inscribe on the Board</button>
+      <button class="btn" id="skipScore">Skip</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="lbDlg">
+  <div class="dlg-head">Cvrsvs Honorvm</div>
+  <div class="dlg-body">
+    <div class="lb-tabs" id="lbTabs"></div>
+    <div id="lbBody"></div>
+    <div class="lb-foot">
+      <button class="clear" id="lbClear">Clear this board</button>
+      <button class="btn" id="lbClose">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+/* =====================================================================
+   LVDVS LOGICAE — puzzle engine
+   ===================================================================== */
+
+const rand = n => Math.floor(Math.random() * n);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const NUMWORD = ['', 'one', 'two', 'three', 'four', 'five', 'six'];
+const ROMAN = n => { const v = [[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']]; let s = ''; for (const [d, r] of v) while (n >= d) { s += r; n -= d; } return s; };
+
+/* ---------- difficulty ---------- */
+const DIFFS = ['Easy', 'Moderate', 'Hard', 'Extreme'];
+const DIFF_CFG = {
+  Easy:     { cats: 3, items: 3, adv: false, latin: 'Tiro',      w: { pos: 6,   neg: 3, eo: 1, cmp: 1, swap: 0 } },
+  Moderate: { cats: 3, items: 4, adv: false, latin: 'Miles',     w: { pos: 3,   neg: 3, eo: 2, cmp: 2, swap: 1 } },
+  Hard:     { cats: 4, items: 4, adv: true,  latin: 'Centvrio',  w: { pos: 1.5, neg: 3, eo: 3, cmp: 3, swap: 2 } },
+  Extreme:  { cats: 4, items: 5, adv: true,  latin: 'Legatvs',   w: { pos: 0.6, neg: 2, eo: 3, cmp: 4, swap: 3 } },
+};
+
+/* ---------- scenarios ----------
+   Each category: name, items (short grid labels), phrase(i) -> noun phrase for the person,
+   whoQ(i) -> "Who ...?" question, q(name) -> attribute question.
+   Ordinal category adds: ordinal:true, less(x,y) comparison template, prefix (positions must start at 1st).
+--------------------------------- */
+function ordCat(name, values, labelFn, longFn, phraseFn, whoQFn, qFn, lessFn, prefix) {
+  return { name, ordinal: true, prefix: !!prefix, values,
+    items: values.map(labelFn), longs: values.map(longFn),
+    phrase(i) { return phraseFn(this.longs[i]); },
+    whoQ(i) { return whoQFn(this.longs[i]); },
+    q: qFn, less: lessFn };
+}
+
+const SCENARIOS = [
+  {
+    title: 'Market Day at the Forum',
+    story: n => `It is market day at the Forum Boarium, and the gossips of the Subura are insatiable. ${cap(NUMWORD[n])} citizens each carried home exactly one purchase, and no two of them paid the same price. From the fragments of rumor below, reconstruct the whole affair.`,
+    people: { name: 'Citizens', items: ['Marcus', 'Livia', 'Cassia', 'Titus', 'Octavia', 'Decimus'],
+      phrase(i) { return this.items[i]; }, q: null, whoQ: null },
+    middles: [
+      { name: 'Wares', items: ['Silk', 'Garum', 'Olives', 'Lamp', 'Spelt', 'Honey'],
+        phrase(i) { return `the one who bought the ${this.items[i].toLowerCase()}`; },
+        whoQ(i) { return `Who bought the ${this.items[i].toLowerCase()}?`; },
+        q: n => `What did ${n} buy?` },
+      { name: 'Hills', items: ['Palatine', 'Aventine', 'Esquiline', 'Caelian', 'Quirinal', 'Viminal'],
+        phrase(i) { return `the citizen from the ${this.items[i]}`; },
+        whoQ(i) { return `Who lives on the ${this.items[i]}?`; },
+        q: n => `Which hill does ${n} live on?` },
+    ],
+    ord: () => ordCat('Price', [12, 18, 25, 33, 41, 50],
+      v => `${v}d`, v => `${v} denarii`,
+      l => `the one who paid ${l}`, l => `Who paid ${l}?`,
+      n => `How much did ${n} pay?`,
+      (x, y) => `${x} paid less than ${y}.`),
+  },
+  {
+    title: 'Race at the Circus Maximus',
+    story: n => `Dust settles over the Circus Maximus and the wagers are furious. ${cap(NUMWORD[n])} charioteers drove today, each for a different faction and each behind a famous lead horse — and the crowd cannot agree on the finishing order. Settle the bet.`,
+    people: { name: 'Drivers', items: ['Scorpus', 'Diocles', 'Crescens', 'Felix', 'Musclosus', 'Pompeius'],
+      phrase(i) { return this.items[i]; }, q: null, whoQ: null },
+    middles: [
+      { name: 'Factions', items: ['Blues', 'Greens', 'Reds', 'Whites', 'Purples', 'Golds'],
+        phrase(i) { return `the driver for the ${this.items[i]}`; },
+        whoQ(i) { return `Who races for the ${this.items[i]}?`; },
+        q: n => `Which faction does ${n} race for?` },
+      { name: 'Horses', items: ['Incitatus', 'Volucer', 'Tuscus', 'Passerinus', 'Andraemon', 'Sagitta'],
+        phrase(i) { return `the driver of ${this.items[i]}`; },
+        whoQ(i) { return `Whose chariot is pulled by ${this.items[i]}?`; },
+        q: n => `Which lead horse pulls ${n}'s chariot?` },
+    ],
+    ord: () => ordCat('Finish', [1, 2, 3, 4, 5, 6],
+      v => ['1st','2nd','3rd','4th','5th','6th'][v - 1], v => ['1st','2nd','3rd','4th','5th','6th'][v - 1],
+      l => `the driver who finished ${l}`, l => `Who finished ${l}?`,
+      n => `In which place did ${n} finish?`,
+      (x, y) => `${x} finished ahead of ${y}.`, true),
+  },
+  {
+    title: "The Aedile's Banquet",
+    story: n => `${cap(NUMWORD[n])} senators reclined at a banquet on the Esquiline. Each brought a dish, each holds a different office, and they arrived one after another at the host's door. The scribe recorded only fragments — the rest is yours to deduce.`,
+    people: { name: 'Senators', items: ['Gracchus', 'Lentulus', 'Metellus', 'Scaurus', 'Brutus', 'Crassus'],
+      phrase(i) { return this.items[i]; }, q: null, whoQ: null },
+    middles: [
+      { name: 'Dishes', items: ['Peacock', 'Dormice', 'Oysters', 'Figs', 'Boar', 'Eels'],
+        phrase(i) { return `the senator who brought the ${this.items[i].toLowerCase()}`; },
+        whoQ(i) { return `Who brought the ${this.items[i].toLowerCase()}?`; },
+        q: n => `What dish did ${n} bring?` },
+      { name: 'Offices', items: ['Consul', 'Praetor', 'Quaestor', 'Aedile', 'Tribune', 'Censor'],
+        phrase(i) { return `the ${this.items[i].toLowerCase()}`; },
+        whoQ(i) { return `Who is the ${this.items[i].toLowerCase()}?`; },
+        q: n => `Which office does ${n} hold?` },
+    ],
+    ord: () => ordCat('Arrival', [1, 2, 3, 4, 5, 6],
+      v => ['1st','2nd','3rd','4th','5th','6th'][v - 1], v => ['first','second','third','fourth','fifth','sixth'][v - 1],
+      l => `the senator who arrived ${l}`, l => `Who arrived ${l}?`,
+      n => `In what order did ${n} arrive?`,
+      (x, y) => `${x} arrived before ${y}.`, true),
+  },
+  {
+    title: 'Muster on the Campus Martius',
+    story: n => `At dawn on the Campus Martius, ${NUMWORD[n]} centurions reported to the legate — each from a different legion, each posted to a different province, and no two with the same years of service under the eagle. The muster roll has been smudged; restore it.`,
+    people: { name: 'Centurions', items: ['Gaius', 'Quintus', 'Servius', 'Aulus', 'Numerius', 'Publius'],
+      phrase(i) { return this.items[i]; }, q: null, whoQ: null },
+    middles: [
+      { name: 'Legions', items: ['Legio V', 'Legio X', 'Legio III', 'Legio VI', 'Legio IX', 'Legio XII'],
+        phrase(i) { return `the centurion of ${this.items[i]}`; },
+        whoQ(i) { return `Who serves in ${this.items[i]}?`; },
+        q: n => `Which legion does ${n} serve in?` },
+      { name: 'Provinces', items: ['Hispania', 'Gaul', 'Syria', 'Egypt', 'Britannia', 'Dacia'],
+        phrase(i) { return `the centurion posted to ${this.items[i]}`; },
+        whoQ(i) { return `Who is posted to ${this.items[i]}?`; },
+        q: n => `Where is ${n} posted?` },
+    ],
+    ord: () => ordCat('Service', [5, 8, 12, 16, 21, 25],
+      v => `${v}y`, v => `${v} years`,
+      l => `the one with ${l} of service`, l => `Who has served ${l}?`,
+      n => `How many years has ${n} served?`,
+      (x, y) => `${x} has served fewer years than ${y}.`),
+  },
+];
+
+/* ---------- constraint solver ---------- */
+function newState(K, M) {
+  const p = {};
+  for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++)
+    p[a + '|' + b] = Array.from({ length: M }, () => Array(M).fill(1));
+  return { K, M, p, changed: false, bad: false };
+}
+function isP(st, a, i, b, j) { return a < b ? st.p[a + '|' + b][i][j] : st.p[b + '|' + a][j][i]; }
+function elim(st, a, i, b, j) {
+  if (a < b) { if (st.p[a + '|' + b][i][j]) { st.p[a + '|' + b][i][j] = 0; st.changed = true; } }
+  else { if (st.p[b + '|' + a][j][i]) { st.p[b + '|' + a][j][i] = 0; st.changed = true; } }
+}
+function confirmPair(st, a, i, b, j) {
+  for (let k = 0; k < st.M; k++) {
+    if (k !== j) elim(st, a, i, b, k);
+    if (k !== i) elim(st, a, k, b, j);
+  }
+}
+function propagate(st, clues, adv) {
+  let guard = 0;
+  do {
+    st.changed = false; guard++;
+    for (const c of clues) if (c.dyn) { c.apply(st); if (st.bad) return; }
+    const { K, M } = st;
+    // single-candidate rows -> confirm; then sync confirmed pairs across categories
+    for (let a = 0; a < K; a++) for (let b = 0; b < K; b++) {
+      if (a === b) continue;
+      for (let i = 0; i < M; i++) {
+        let cnt = 0, last = -1;
+        for (let j = 0; j < M; j++) if (isP(st, a, i, b, j)) { cnt++; last = j; }
+        if (cnt === 0) { st.bad = true; return; }
+        if (cnt === 1) {
+          confirmPair(st, a, i, b, last);
+          const j = last;
+          for (let c = 0; c < K; c++) {
+            if (c === a || c === b) continue;
+            for (let k = 0; k < M; k++) {
+              const pa = isP(st, a, i, c, k), pb = isP(st, b, j, c, k);
+              if (pa && !pb) elim(st, a, i, c, k);
+              else if (pb && !pa) elim(st, b, j, c, k);
+            }
+          }
+        }
+      }
+    }
+    // advanced rule (Hard/Extreme): a pairing needs a common companion in every third category
+    if (adv) {
+      for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++)
+        for (let i = 0; i < M; i++) for (let j = 0; j < M; j++) {
+          if (!isP(st, a, i, b, j)) continue;
+          for (let c = 0; c < K; c++) {
+            if (c === a || c === b) continue;
+            let ok = false;
+            for (let k = 0; k < M; k++) if (isP(st, a, i, c, k) && isP(st, b, j, c, k)) { ok = true; break; }
+            if (!ok) { elim(st, a, i, b, j); break; }
+          }
+        }
+    }
+  } while (st.changed && guard < 800);
+}
+function solve(clues, K, M, adv) {
+  const st = newState(K, M);
+  for (const c of clues) if (!c.dyn) { c.apply(st); if (st.bad) break; }
+  if (!st.bad) propagate(st, clues, adv);
+  let count = 0, solved = true;
+  if (st.bad) return { st, solved: false, count: Infinity };
+  for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++)
+    for (let i = 0; i < M; i++) {
+      let c = 0;
+      for (let j = 0; j < M; j++) if (st.p[a + '|' + b][i][j]) c++;
+      count += c;
+      if (c !== 1) solved = false;
+    }
+  return { st, solved, count };
+}
+
+/* ---------- clue constructors ---------- */
+const cluePos = (a, i, b, j, text) => ({ dyn: false, type: 'pos', text, pairKey: [a, i, b, j],
+  apply: st => confirmPair(st, a, i, b, j) });
+const clueNeg = (a, i, b, j, text) => ({ dyn: false, type: 'neg', text,
+  apply: st => elim(st, a, i, b, j) });
+const clueEO = (a, i1, i2, b, j, text) => ({ dyn: false, type: 'eo', text,
+  apply: st => { for (let k = 0; k < st.M; k++) if (k !== i1 && k !== i2) elim(st, a, k, b, j); } });
+const clueSwap = (A, x1, x2, B, p, q, text) => ({ dyn: false, type: 'swap', text,
+  apply: st => {
+    for (let k = 0; k < st.M; k++) {
+      if (k !== p && k !== q) { elim(st, A, x1, B, k); elim(st, A, x2, B, k); }
+      if (k !== x1 && k !== x2) { elim(st, A, k, B, p); elim(st, A, k, B, q); }
+    }
+  } });
+const clueCmp = (cx, ix, cy, iy, O, text) => ({ dyn: true, type: 'cmp', text,
+  apply: st => {
+    if (cx !== cy) elim(st, cx, ix, cy, iy);
+    const sx = [], sy = [];
+    for (let k = 0; k < st.M; k++) {
+      if (isP(st, cx, ix, O, k)) sx.push(k);
+      if (isP(st, cy, iy, O, k)) sy.push(k);
+    }
+    if (!sx.length || !sy.length) { st.bad = true; return; }
+    const maxY = Math.max(...sy), minX = Math.min(...sx);
+    for (const k of sx) if (k >= maxY) elim(st, cx, ix, O, k);
+    for (const k of sy) if (k <= minX) elim(st, cy, iy, O, k);
+  } });
+
+/* ---------- puzzle generator ---------- */
+function buildCats(scen, cfg) {
+  const M = cfg.items, K = cfg.cats;
+  const pick = (cat) => ({ ...cat, items: shuffle(cat.items).slice(0, M) });
+  const cats = [pick(scen.people)];
+  const mids = shuffle(scen.middles).slice(0, K - 2);
+  for (const m of mids) cats.push(pick(m));
+  // ordinal: keep values sorted; positions must be a prefix (1st..Mth)
+  const o = scen.ord();
+  let idxs;
+  if (o.prefix) idxs = Array.from({ length: M }, (_, i) => i);
+  else idxs = shuffle(o.values.map((_, i) => i)).slice(0, M).sort((x, y) => x - y);
+  cats.push({ ...o, values: idxs.map(i => o.values[i]), items: idxs.map(i => o.items[i]), longs: idxs.map(i => o.longs[i]) });
+  return cats;
+}
+
+function generatePuzzle(diffName) {
+  const cfg = DIFF_CFG[diffName];
+  const K = cfg.cats, M = cfg.items;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const scen = SCENARIOS[rand(SCENARIOS.length)];
+    const cats = buildCats(scen, cfg);
+    const O = K - 1; // ordinal category index
+    // solution: sol[c][e] = item index of entity e in category c
+    const sol = [Array.from({ length: M }, (_, e) => e)];
+    for (let c = 1; c < K; c++) sol.push(shuffle(Array.from({ length: M }, (_, e) => e)));
+    const ph = (c, i) => cats[c].phrase(i);
+
+    /* candidate clue pool */
+    const pool = [];
+    const push = (clue, w) => pool.push({ clue, w });
+    const W = cfg.w;
+    for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++) {
+      for (let e = 0; e < M; e++) {
+        const i = sol[a][e], j = sol[b][e];
+        push(cluePos(a, i, b, j, cap(ph(a, i)) + ' is ' + ph(b, j) + '.'), W.pos);
+        // negatives: a couple of false pairings per true one
+        for (let t = 0; t < 2; t++) {
+          const j2 = rand(M);
+          if (sol[b].indexOf(j2) === -1) continue;
+          const e2 = sol[b].indexOf(j2);
+          if (e2 !== e && W.neg > 0)
+            push(clueNeg(a, i, b, j2, cap(ph(a, i)) + ' is not ' + ph(b, j2) + '.'), W.neg);
+        }
+      }
+    }
+    // either/or: attribute belongs to one of two people
+    if (W.eo > 0) for (let b = 1; b < K; b++) for (let e = 0; e < M; e++) {
+      const j = sol[b][e];
+      let d = rand(M); if (d === e) d = (d + 1) % M;
+      const [p1, p2] = Math.random() < .5 ? [e, d] : [d, e];
+      push(clueEO(0, p1, p2, b, j,
+        cap(ph(b, j)) + ' is either ' + ph(0, p1) + ' or ' + ph(0, p2) + '.'), W.eo);
+    }
+    // comparisons on the ordinal category
+    if (W.cmp > 0) {
+      const ordOf = e => sol[O][e];
+      for (let e1 = 0; e1 < M; e1++) for (let e2 = 0; e2 < M; e2++) {
+        if (ordOf(e1) >= ordOf(e2)) continue;
+        for (let t = 0; t < 2; t++) {
+          const cx = rand(O), cy = rand(O); // any non-ordinal category (0..O-1)
+          const ix = sol[cx][e1], iy = sol[cy][e2];
+          if (cx === cy && ix === iy) continue;
+          push(clueCmp(cx, ix, cy, iy, O, cats[O].less(cap(ph(cx, ix)), ph(cy, iy))), W.cmp);
+        }
+      }
+    }
+    // swap: "Of X and Y, one is P and the other is Q."
+    if (W.swap > 0) for (let e1 = 0; e1 < M; e1++) for (let e2 = e1 + 1; e2 < M; e2++) {
+      const B = 1 + rand(K - 1);
+      const p = sol[B][e1], q = sol[B][e2];
+      push(clueSwap(0, e1, e2, B, p, q,
+        'Of ' + ph(0, e1) + ' and ' + ph(0, e2) + ', one is ' + ph(B, p) + ' and the other is ' + ph(B, q) + '.'), W.swap);
+    }
+
+    /* greedy: add clues that make progress until solvable by deduction */
+    let clues = [];
+    let base = solve(clues, K, M, cfg.adv);
+    const live = pool.slice();
+    let ok = false;
+    while (live.length) {
+      // weighted sample without replacement
+      let tot = 0; for (const c of live) tot += c.w;
+      let r = Math.random() * tot, idx = 0;
+      for (; idx < live.length - 1; idx++) { r -= live[idx].w; if (r <= 0) break; }
+      const cand = live.splice(idx, 1)[0].clue;
+      const test = solve([...clues, cand], K, M, cfg.adv);
+      if (test.count < base.count) { clues.push(cand); base = test; }
+      if (base.solved) { ok = true; break; }
+    }
+    if (!ok) continue;
+
+    /* prune to a minimal clue set */
+    for (const c of shuffle(clues)) {
+      const rest = clues.filter(x => x !== c);
+      if (solve(rest, K, M, cfg.adv).solved) clues = rest;
+    }
+
+    /* sanity: solver's unique solution must match ours */
+    const fin = solve(clues, K, M, cfg.adv);
+    let match = fin.solved;
+    if (match) for (let a = 0; a < K && match; a++) for (let b = a + 1; b < K && match; b++)
+      for (let e = 0; e < M && match; e++)
+        if (!isP(fin.st, a, sol[a][e], b, sol[b][e])) match = false;
+    if (!match) continue;
+
+    clues = shuffle(clues);
+    return { scen, cats, sol, clues, K, M, O, question: makeQuestion(cats, sol, K, M, clues) };
+  }
+  throw new Error('generation failed');
+}
+
+function makeQuestion(cats, sol, K, M, clues) {
+  const samePair = (p, q) =>
+    (p[0] === q[0] && p[1] === q[1] && p[2] === q[2] && p[3] === q[3]) ||
+    (p[0] === q[2] && p[1] === q[3] && p[2] === q[0] && p[3] === q[1]);
+  const directlyStated = key => clues.some(c => c.type === 'pos' && samePair(c.pairKey, key));
+  const tries = [];
+  for (let t = 0; t < 14; t++) {
+    const e = rand(M);
+    if (Math.random() < 0.5) {
+      const ca = 1 + rand(K - 1), ia = sol[ca][e];
+      tries.push({ text: cats[ca].whoQ(ia), optCat: 0, answer: e, key: [ca, ia, 0, e] });
+    } else {
+      const cb = 1 + rand(K - 1);
+      tries.push({ text: cats[cb].q(cats[0].items[e]), optCat: cb, answer: sol[cb][e], key: [0, e, cb, sol[cb][e]] });
+    }
+  }
+  return tries.find(q => !directlyStated(q.key)) || tries[0];
+}
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+let puzzle = null, marks = {}, cellEls = {};
+let difficulty = 'Easy';
+let startTime = 0, penaltyMs = 0, timerId = null, finished = false, revealed = false;
+let selectedChip = -1, finalTime = 0;
+
+const keyOf = (a, i, b, j) => a < b ? `${a}|${i}|${b}|${j}` : `${b}|${j}|${a}|${i}`;
+const fmt = ms => {
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+};
+
+/* ----- difficulty segmented control ----- */
+function buildSeg() {
+  const seg = $('diffSeg'); seg.innerHTML = '';
+  DIFFS.forEach((d, i) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<span class="rn">${ROMAN(i + 1)}</span><span class="lbl">${d}</span>`;
+    b.title = `${d} — ${DIFF_CFG[d].latin}`;
+    b.className = d === difficulty ? 'on' : '';
+    b.addEventListener('click', () => { difficulty = d; buildSeg(); newPuzzle(); });
+    seg.appendChild(b);
+  });
+}
+
+/* ----- timer ----- */
+function tick() {
+  const el = finished ? finalTime : (performance.now() - startTime) + penaltyMs;
+  $('timer').textContent = fmt(el);
+  $('penLabel').textContent = penaltyMs ? `+${Math.round(penaltyMs / 1000)}s penalty` : '';
+}
+function startTimer() {
+  clearInterval(timerId);
+  startTime = performance.now(); penaltyMs = 0; finished = false;
+  timerId = setInterval(tick, 200); tick();
+}
+
+/* ----- puzzle lifecycle ----- */
+function newPuzzle() {
+  puzzle = generatePuzzle(difficulty);
+  marks = {}; cellEls = {}; revealed = false; selectedChip = -1;
+  $('diffLabel').textContent = `${difficulty} · ${DIFF_CFG[difficulty].latin}`;
+  $('storyTitle').textContent = puzzle.scen.title;
+  $('storyText').textContent = puzzle.scen.story(puzzle.M);
+  $('qMsg').textContent = '';
+  $('qSubmit').disabled = false; $('hintBtn').disabled = false; $('revealBtn').disabled = false;
+  renderClues(); renderQuestion(); renderGrid();
+  startTimer();
+}
+
+function renderClues() {
+  const ol = $('clueList'); ol.innerHTML = '';
+  puzzle.clues.forEach((c, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="num">${ROMAN(i + 1)}.</span><span>${c.text}</span>`;
+    li.addEventListener('click', () => li.classList.toggle('done'));
+    ol.appendChild(li);
+  });
+}
+
+function renderQuestion() {
+  const q = puzzle.question;
+  $('qText').textContent = q.text;
+  const wrap = $('qChips'); wrap.innerHTML = '';
+  puzzle.cats[q.optCat].items.forEach((it, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = it;
+    b.addEventListener('click', () => {
+      selectedChip = i;
+      wrap.querySelectorAll('.chip').forEach((c, k) => c.classList.toggle('sel', k === i));
+    });
+    wrap.appendChild(b);
+  });
+}
+
+/* ----- grid ----- */
+function renderGrid() {
+  const { K, M, cats } = puzzle;
+  const colCats = []; for (let c = 1; c < K; c++) colCats.push(c);
+  const rowGroups = [0]; for (let c = K - 1; c >= 2; c--) rowGroups.push(c);
+  const colsFor = rg => rg === 0 ? colCats : colCats.filter(c => c < rg);
+
+  const tbl = document.createElement('table'); tbl.className = 'lg';
+  // header row 1: category names
+  let tr = document.createElement('tr');
+  tr.innerHTML = `<th class="corner" colspan="2" rowspan="2"></th>`;
+  for (const c of colCats) {
+    const th = document.createElement('th');
+    th.className = 'catlab'; th.colSpan = M; th.textContent = cats[c].name;
+    tr.appendChild(th);
+  }
+  tbl.appendChild(tr);
+  // header row 2: item labels (vertical)
+  tr = document.createElement('tr');
+  for (const c of colCats) for (let j = 0; j < M; j++) {
+    const th = document.createElement('th');
+    th.className = 'itemlab top' + (j === 0 ? ' blkL' : '') + (j === M - 1 ? ' blkR' : '');
+    th.innerHTML = `<span>${cats[c].items[j]}</span>`;
+    tr.appendChild(th);
+  }
+  tbl.appendChild(tr);
+  // body row groups
+  for (const rg of rowGroups) {
+    const cols = colsFor(rg);
+    for (let i = 0; i < M; i++) {
+      tr = document.createElement('tr');
+      if (i === 0) {
+        const th = document.createElement('th');
+        th.className = 'catlab vert'; th.rowSpan = M;
+        th.innerHTML = `<span>${cats[rg].name}</span>`;
+        tr.appendChild(th);
+      }
+      const lab = document.createElement('th');
+      lab.className = 'itemlab side' + (i === 0 ? ' blkT' : '') + (i === M - 1 ? ' blkB' : '');
+      lab.textContent = cats[rg].items[i];
+      tr.appendChild(lab);
+      for (const c of cols) for (let j = 0; j < M; j++) {
+        const td = document.createElement('td');
+        td.className = 'cell'
+          + (j === 0 ? ' blkL' : '') + (j === M - 1 ? ' blkR' : '')
+          + (i === 0 ? ' blkT' : '') + (i === M - 1 ? ' blkB' : '');
+        td.tabIndex = 0;
+        const key = keyOf(rg, i, c, j);
+        cellEls[key] = td;
+        const act = () => cycleCell(rg, i, c, j);
+        td.addEventListener('click', act);
+        td.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); act(); } });
+        tr.appendChild(td);
+      }
+      tbl.appendChild(tr);
+    }
+  }
+  const wrap = $('gridWrap'); wrap.innerHTML = ''; wrap.appendChild(tbl);
+}
+
+/* mark values: 'X' = player ✕, 'A' = auto ✕ (placed by a ●), 'O' = confirmed */
+function paintCell(key) {
+  const el = cellEls[key]; if (!el) return;
+  const v = marks[key] || '';
+  el.classList.toggle('x', v === 'X' || v === 'A');
+  el.classList.toggle('o', v === 'O');
+  el.textContent = (v === 'X' || v === 'A') ? '✕' : v === 'O' ? '●' : '';
+}
+function setMark(a, i, b, j, v) { const k = keyOf(a, i, b, j); if (v) marks[k] = v; else delete marks[k]; paintCell(k); }
+function placeO(a, i, b, j) {
+  setMark(a, i, b, j, 'O');
+  for (let t = 0; t < puzzle.M; t++) {
+    if (t !== j && !(marks[keyOf(a, i, b, t)])) setMark(a, i, b, t, 'A');
+    if (t !== i && !(marks[keyOf(a, t, b, j)])) setMark(a, t, b, j, 'A');
+  }
+}
+function removeO(a, i, b, j) {
+  setMark(a, i, b, j, '');
+  // drop auto-✕s this ● created, unless another ● in the block still justifies them
+  const hasORow = r => { for (let t = 0; t < puzzle.M; t++) if (marks[keyOf(a, r, b, t)] === 'O') return true; return false; };
+  const hasOCol = c => { for (let t = 0; t < puzzle.M; t++) if (marks[keyOf(a, t, b, c)] === 'O') return true; return false; };
+  for (let t = 0; t < puzzle.M; t++) {
+    if (t !== j && marks[keyOf(a, i, b, t)] === 'A' && !hasOCol(t)) setMark(a, i, b, t, '');
+    if (t !== i && marks[keyOf(a, t, b, j)] === 'A' && !hasORow(t)) setMark(a, t, b, j, '');
+  }
+}
+function cycleCell(a, i, b, j) {
+  if (revealed || finished) return;
+  const cur = marks[keyOf(a, i, b, j)] || '';
+  if (cur === 'O') { removeO(a, i, b, j); return; }
+  const next = (cur === '') ? 'X' : 'O'; // 'X' and 'A' both advance to 'O'
+  if (next === 'O') placeO(a, i, b, j);
+  else setMark(a, i, b, j, next);
+}
+function clearGrid() {
+  if (revealed || finished) return;
+  marks = {};
+  for (const k of Object.keys(cellEls)) paintCell(k);
+}
+
+/* ----- hint / reveal ----- */
+function hint() {
+  if (revealed || finished) return;
+  const { K, M, sol } = puzzle;
+  const opts = [];
+  for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++)
+    for (let e = 0; e < M; e++) {
+      const k = keyOf(a, sol[a][e], b, sol[b][e]);
+      if (cellEls[k] && marks[k] !== 'O') opts.push([a, sol[a][e], b, sol[b][e]]);
+    }
+  if (!opts.length) return;
+  const [a, i, b, j] = opts[rand(opts.length)];
+  penaltyMs += 45000; tick();
+  placeO(a, i, b, j);
+  const el = cellEls[keyOf(a, i, b, j)];
+  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1200);
+}
+
+function reveal() {
+  if (finished) return;
+  revealed = true; finished = true;
+  finalTime = (performance.now() - startTime) + penaltyMs;
+  clearInterval(timerId); tick();
+  const { K, M, sol } = puzzle;
+  for (let a = 0; a < K; a++) for (let b = a + 1; b < K; b++) {
+    const map = {}; for (let e = 0; e < M; e++) map[sol[a][e]] = sol[b][e];
+    for (let i = 0; i < M; i++) for (let j = 0; j < M; j++) {
+      const k = keyOf(a, i, b, j);
+      if (cellEls[k]) { marks[k] = map[i] === j ? 'O' : 'X'; paintCell(k); }
+    }
+  }
+  $('qSubmit').disabled = true; $('hintBtn').disabled = true; $('revealBtn').disabled = true;
+  $('qMsg').textContent = 'Solution revealed — no laurels this time.';
+}
+
+/* ----- answering ----- */
+function submitAnswer() {
+  if (finished || revealed) return;
+  if (selectedChip < 0) { flashMsg('Choose an answer first, citizen.'); return; }
+  if (selectedChip === puzzle.question.answer) {
+    finished = true;
+    finalTime = (performance.now() - startTime) + penaltyMs;
+    clearInterval(timerId); tick();
+    $('qSubmit').disabled = true; $('hintBtn').disabled = true; $('revealBtn').disabled = true;
+    openWin();
+  } else {
+    penaltyMs += 30000; tick();
+    flashMsg('The augurs frown — wrong! (+30s)');
+    const p = $('qChips'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+  }
+}
+function flashMsg(t) { $('qMsg').textContent = t; setTimeout(() => { if ($('qMsg').textContent === t) $('qMsg').textContent = ''; }, 3500); }
+
+/* ----- win + leaderboard ----- */
+const LB_KEY = 'ludusLogicae.leaderboard.v1';
+const NAME_KEY = 'ludusLogicae.name';
+let lastEntryStamp = null, lbTab = 'Easy';
+
+function loadLB() { try { return JSON.parse(localStorage.getItem(LB_KEY)) || {}; } catch { return {}; } }
+function saveLB(lb) { localStorage.setItem(LB_KEY, JSON.stringify(lb)); }
+
+function openWin() {
+  $('winTime').textContent = fmt(finalTime);
+  const base = finalTime - penaltyMs;
+  $('winDetail').innerHTML = penaltyMs
+    ? `${fmt(base)} solving &nbsp;+&nbsp; <span class="pen">${Math.round(penaltyMs / 1000)}s in penalties</span> &nbsp;·&nbsp; ${difficulty}`
+    : `A clean solve — no penalties · ${difficulty}`;
+  $('nameInput').value = localStorage.getItem(NAME_KEY) || '';
+  $('winDlg').showModal();
+  $('nameInput').focus();
+}
+function inscribe() {
+  const name = ($('nameInput').value.trim() || 'Anonymvs').slice(0, 20);
+  localStorage.setItem(NAME_KEY, name);
+  const lb = loadLB();
+  if (!lb[difficulty]) lb[difficulty] = [];
+  const entry = { name, time: Math.round(finalTime), date: new Date().toISOString().slice(0, 10), scen: puzzle.scen.title, stamp: Date.now() + '' + rand(9999) };
+  lb[difficulty].push(entry);
+  lb[difficulty].sort((a, b) => a.time - b.time);
+  lb[difficulty] = lb[difficulty].slice(0, 10);
+  saveLB(lb);
+  lastEntryStamp = entry.stamp;
+  $('winDlg').close();
+  lbTab = difficulty;
+  openLB();
+}
+function openLB() {
+  renderLBTabs(); renderLBBody();
+  $('lbDlg').showModal();
+}
+function renderLBTabs() {
+  const t = $('lbTabs'); t.innerHTML = '';
+  DIFFS.forEach(d => {
+    const b = document.createElement('button');
+    b.textContent = d; b.className = d === lbTab ? 'on' : '';
+    b.addEventListener('click', () => { lbTab = d; renderLBTabs(); renderLBBody(); });
+    t.appendChild(b);
+  });
+}
+function renderLBBody() {
+  const rows = (loadLB()[lbTab] || []);
+  const body = $('lbBody');
+  if (!rows.length) {
+    body.innerHTML = `<p class="lb-empty">No names inscribed yet at this rank. Glory awaits.</p>`;
+    return;
+  }
+  let h = `<table class="lb"><tr><th>Rank</th><th>Citizen</th><th>Time</th><th>Tale</th><th>Date</th></tr>`;
+  rows.forEach((r, i) => {
+    h += `<tr class="${r.stamp === lastEntryStamp ? 'me' : ''}">
+      <td class="rank">${ROMAN(i + 1)}</td><td>${escapeHtml(r.name)}</td>
+      <td>${fmt(r.time)}</td><td>${escapeHtml(r.scen || '')}</td><td>${r.date}</td></tr>`;
+  });
+  body.innerHTML = h + '</table>';
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* ----- wire up ----- */
+$('newBtn').addEventListener('click', newPuzzle);
+$('qSubmit').addEventListener('click', submitAnswer);
+$('clearBtn').addEventListener('click', clearGrid);
+$('hintBtn').addEventListener('click', hint);
+$('revealBtn').addEventListener('click', reveal);
+$('lbBtn').addEventListener('click', () => { lbTab = difficulty; openLB(); });
+$('lbClose').addEventListener('click', () => $('lbDlg').close());
+$('lbClear').addEventListener('click', () => {
+  if (confirm(`Erase all times for ${lbTab}?`)) {
+    const lb = loadLB(); delete lb[lbTab]; saveLB(lb); renderLBBody();
+  }
+});
+$('saveScore').addEventListener('click', inscribe);
+$('skipScore').addEventListener('click', () => $('winDlg').close());
+$('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') inscribe(); });
+
+buildSeg();
+newPuzzle();
+</script>
