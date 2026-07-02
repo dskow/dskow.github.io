@@ -61,7 +61,16 @@
   .board-col{flex:1 1 380px;display:flex;flex-direction:column;align-items:center;min-width:300px}
   .rail{flex:0 1 300px;min-width:260px;display:flex;flex-direction:column;gap:18px}
 
-  /* ---------- difficulty tabs ---------- */
+  /* ---------- variant + difficulty tabs ---------- */
+  .vtabs{display:flex;border:2px solid var(--wall);border-radius:4px;overflow:hidden}
+  .vtab{
+    flex:1;font-family:var(--display);font-size:20px;letter-spacing:.06em;text-transform:uppercase;
+    padding:9px 6px 7px;cursor:pointer;border:0;border-radius:0;
+    background:var(--asphalt-2);color:var(--paint-dim);transition:background .15s,color .15s;
+  }
+  .vtab:hover{color:var(--paint)}
+  .vtab.on{background:var(--paint);color:var(--ink)}
+
   .modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .mode{
     font-family:var(--display);font-size:22px;letter-spacing:.06em;text-transform:uppercase;
@@ -82,6 +91,7 @@
   }
   .stat .lab{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--paint-dim);text-transform:uppercase}
   .stat .val{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;color:var(--paint);line-height:1.2}
+  .stat .val.sm{font-size:19px;line-height:1.65}
   .stat .val.over{color:var(--caution)}
 
   .puzline{
@@ -144,10 +154,12 @@
   .exit-tag .chev:nth-child(2){animation-delay:.2s}
   .exit-tag .chev:nth-child(3){animation-delay:.4s}
   @keyframes chev{0%,100%{opacity:.25}50%{opacity:1}}
+  .board-frame.cp .exit-cut,.board-frame.cp .exit-tag{display:none}
 
   /* ---------- cars ---------- */
   .car{position:absolute;z-index:2;cursor:grab;-webkit-user-select:none;user-select:none}
   .car.dragging{cursor:grabbing;z-index:5}
+  .board-frame.cp .car{cursor:pointer}
   .car .body{
     position:absolute;inset:5px;border-radius:9px;
     box-shadow:inset 0 2px 3px rgba(255,255,255,.28),inset 0 -4px 6px rgba(0,0,0,.38),0 4px 8px rgba(0,0,0,.45);
@@ -168,6 +180,47 @@
   }
   .car.selected .body{outline:2px solid var(--caution);outline-offset:1px}
   .car.exiting{transition:left 1s cubic-bezier(.5,0,.9,.6),opacity 1s ease .25s;opacity:0}
+  .car.driveout{transition:left .42s cubic-bezier(.6,0,.9,.5),top .42s cubic-bezier(.6,0,.9,.5),opacity .42s;opacity:0}
+
+  /* ---------- carpool dock ---------- */
+  .dock{width:min(92vw,460px);margin-top:16px;display:flex;flex-direction:column;gap:14px}
+  .dock[hidden]{display:none}
+  .dock-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--paint-dim);
+    text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:6px;
+  }
+  .slots{display:flex;gap:10px}
+  .slot{
+    flex:1;height:62px;border:2px dashed #40454F;border-radius:8px;position:relative;
+    background:rgba(233,230,220,.02);
+  }
+  .slot::before{
+    content:"P";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-size:30px;color:rgba(233,230,220,.13);
+  }
+  .slot.flash{animation:slotflash .45s}
+  @keyframes slotflash{0%,100%{border-color:#40454F}50%{border-color:var(--hero)}}
+  .pcar{
+    position:absolute;inset:6px;border-radius:8px;z-index:1;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.25),inset 0 -3px 5px rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.4);
+    transition:transform .35s ease,opacity .35s ease;
+  }
+  .pcar.arrive{animation:arrive .3s ease-out}
+  @keyframes arrive{from{transform:translateY(-16px);opacity:0}}
+  .pcar.depart{transform:translateX(72px);opacity:0}
+  .seat{width:13px;height:13px;border-radius:50%;border:2px solid rgba(16,17,20,.5)}
+  .seat.filled{background:var(--paint);border-color:rgba(16,17,20,.3)}
+  .queue{display:flex;gap:6px;align-items:center;min-height:24px;flex-wrap:wrap}
+  .person{
+    width:17px;height:17px;border-radius:50% 50% 44% 44%;flex:none;
+    box-shadow:inset 0 -3px 4px rgba(0,0,0,.35),inset 0 2px 2px rgba(255,255,255,.3);
+    transition:transform .22s,opacity .22s;
+  }
+  .person.front{outline:2px solid var(--paint);outline-offset:2px;animation:bob 1.1s infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .person.hop{transform:translateY(-26px) scale(.5);opacity:0}
+  .qmore{font-family:var(--mono);font-size:11px;color:var(--paint-dim)}
 
   /* ---------- leaderboard ---------- */
   .lb{margin-top:44px}
@@ -196,7 +249,7 @@
   td .delta.par{color:var(--win)}
   .lb-empty{font-family:var(--mono);font-size:13px;color:var(--paint-dim);padding:18px 0}
 
-  /* ---------- win overlay ---------- */
+  /* ---------- win / lose overlay ---------- */
   #overlay{
     position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
     background:rgba(12,13,16,.78);backdrop-filter:blur(3px);padding:16px;
@@ -213,10 +266,12 @@
     font-family:var(--display);font-weight:400;font-size:44px;letter-spacing:.04em;
     text-transform:uppercase;margin:0;color:var(--caution);line-height:1;
   }
+  .card.lose h3{color:var(--hero)}
   .card .parnote{font-family:var(--mono);font-size:13px;color:var(--paint-dim);margin:8px 0 18px}
   .card .parnote .good{color:var(--win)}
   .card .bigstats{display:flex;justify-content:center;gap:26px;margin-bottom:20px}
   .card .bigstats .val{font-family:var(--mono);font-size:30px;font-variant-numeric:tabular-nums}
+  .card .bigstats .val.sm{font-size:22px;line-height:1.45}
   .card .bigstats .lab{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--paint-dim);text-transform:uppercase}
   .saverow{display:flex;gap:8px;margin-bottom:14px}
   .saverow input{
@@ -245,7 +300,10 @@
     .exit-tag .chev{animation:none}
     #board.shake{animation:none}
     .car.exiting{transition:opacity .2s}
+    .car.driveout{transition:opacity .15s}
     .card{animation:none}
+    .person.front{animation:none}
+    .pcar.arrive{animation:none}
   }
 </style>
 
@@ -253,27 +311,44 @@
   <header>
     <div class="sign">
       <h1>GRID<span class="red">LOCK</span></h1>
-      <div class="tagline">Car jam puzzles &middot; free the red car</div>
+      <div class="tagline" id="tagline">Car jam puzzles &middot; free the red car</div>
     </div>
     <div class="stripe" aria-hidden="true"></div>
   </header>
 
   <main>
     <div class="board-col">
-      <div class="board-frame">
+      <div class="board-frame" id="boardFrame">
         <div id="board" aria-label="Puzzle board"></div>
         <div class="exit-cut" aria-hidden="true"></div>
         <div class="exit-tag" aria-hidden="true"><span>EXIT</span><span class="chev">&#9654;</span><span class="chev">&#9654;</span><span class="chev">&#9654;</span></div>
       </div>
+
+      <div id="dock" class="dock" hidden>
+        <div>
+          <div class="dock-label"><span>Parking</span><span id="slotHint">tap a car with a clear lane</span></div>
+          <div class="slots" id="slots"></div>
+        </div>
+        <div>
+          <div class="dock-label"><span>The line</span><span id="queueCount"></span></div>
+          <div class="queue" id="queueLine"></div>
+        </div>
+      </div>
+
       <div class="puzline" id="puzline"></div>
     </div>
 
     <div class="rail">
+      <div class="vtabs" id="vtabs" role="tablist" aria-label="Game variant">
+        <button class="vtab on" data-v="classic" role="tab">Classic</button>
+        <button class="vtab" data-v="carpool" role="tab">Carpool</button>
+      </div>
+
       <div class="modes" id="modes" role="tablist" aria-label="Difficulty"></div>
 
       <div class="stats">
-        <div class="stat"><div class="lab">Moves</div><div class="val" id="stMoves">0</div></div>
-        <div class="stat"><div class="lab">Par</div><div class="val" id="stPar">–</div></div>
+        <div class="stat"><div class="lab" id="labA">Moves</div><div class="val" id="stMoves">0</div></div>
+        <div class="stat"><div class="lab" id="labB">Par</div><div class="val" id="stPar">–</div></div>
         <div class="stat"><div class="lab">Time</div><div class="val" id="stTime">0:00</div></div>
       </div>
 
@@ -284,32 +359,28 @@
         <button id="btnSound">Sound: on</button>
       </div>
 
-      <p class="howto">
-        <b>Drag cars along their lane</b> to clear a path, then drive the
-        <b style="color:var(--hero)">red car</b> out the exit.
-        Par is the fewest moves possible &mdash; sliding one car any distance counts as one move.
-        You can also click a car and use the arrow keys.
-      </p>
+      <p class="howto" id="howto"></p>
     </div>
   </main>
 
   <section class="lb">
     <h2>Garage records</h2>
-    <div class="sub">Ranked by moves over par, then time. Stored on this device.</div>
+    <div class="sub" id="lbSub"></div>
+    <div class="lb-tabs" id="lbVTabs"></div>
     <div class="lb-tabs" id="lbTabs"></div>
     <div class="lb-scroll"><div id="lbBody"></div></div>
   </section>
 
-  <footer>Gridlock &middot; 40 hand-verified jams &middot; every par proven by exhaustive search</footer>
+  <footer>Gridlock &middot; 40 classic + 40 carpool jams &middot; every one machine-verified solvable</footer>
 </div>
 
 <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
-  <div class="card">
+  <div class="card" id="card">
     <h3 id="winTitle">Traffic cleared!</h3>
     <div class="parnote" id="parNote"></div>
     <div class="bigstats">
-      <div><div class="val" id="wMoves">0</div><div class="lab">Moves</div></div>
-      <div><div class="val" id="wPar">0</div><div class="lab">Par</div></div>
+      <div><div class="val" id="wA">0</div><div class="lab" id="wALab">Moves</div></div>
+      <div><div class="val" id="wB">0</div><div class="lab" id="wBLab">Par</div></div>
       <div><div class="val" id="wTime">0:00</div><div class="lab">Time</div></div>
     </div>
     <div class="saverow" id="saveRow">
@@ -328,8 +399,12 @@
 <script>
 (function(){
 "use strict";
-/* ============ puzzle data: [row,col,len,horiz], v[0]=red car; par = BFS-proven minimum ============ */
+/* ============ classic puzzles: [row,col,len,horiz], v[0]=red car; par = BFS-proven minimum ============ */
 var PUZZLES = {"easy":[{"v":[[2,0,2,1],[5,0,2,1],[3,1,2,1],[3,5,2,0],[1,3,3,1],[2,4,3,0],[0,4,2,1],[1,2,2,0],[0,2,2,1],[4,2,2,0]],"par":4},{"v":[[2,0,2,1],[5,3,3,1],[0,2,2,0],[4,0,3,1],[0,4,3,0],[0,1,2,0],[1,5,3,0]],"par":4},{"v":[[2,2,2,1],[0,4,2,1],[0,0,3,0],[5,2,2,1],[4,5,2,0],[1,1,3,0],[3,3,2,0],[2,4,2,0],[0,2,2,0],[4,4,2,0]],"par":7},{"v":[[2,1,2,1],[4,2,3,1],[5,3,2,1],[1,2,3,1],[5,0,2,1],[3,5,3,0],[3,0,2,1],[2,4,2,0],[2,3,2,0],[1,5,2,0]],"par":5},{"v":[[2,2,2,1],[5,0,2,1],[1,4,3,0],[0,3,2,0],[3,0,2,1],[1,1,2,1],[2,5,2,0],[5,4,2,1],[4,2,2,1],[4,4,2,1],[1,0,2,0]],"par":6},{"v":[[2,1,2,1],[5,4,2,1],[4,2,2,0],[4,1,2,0],[2,3,2,0],[1,4,2,0],[3,0,2,0],[3,1,2,1],[4,4,2,1],[1,0,2,1],[0,0,2,1],[1,5,2,0]],"par":4},{"v":[[2,1,2,1],[0,1,3,1],[4,0,2,1],[1,0,2,0],[5,1,2,1],[1,3,2,0],[3,2,2,1],[2,4,2,0],[1,5,2,0],[4,3,2,1],[3,0,2,1],[0,4,2,1],[1,1,2,1]],"par":6},{"v":[[2,1,2,1],[1,4,2,1],[3,2,2,0],[3,3,2,1],[4,5,2,0],[0,3,3,1],[4,3,2,1],[5,2,2,1],[4,0,2,0],[0,0,2,1],[1,0,3,0],[2,5,2,0]],"par":4},{"v":[[2,0,2,1],[2,2,2,0],[1,4,2,1],[4,0,2,1],[0,2,2,0],[2,3,2,0],[4,3,3,1],[2,5,2,0]],"par":7},{"v":[[2,0,2,1],[1,5,3,0],[5,4,2,1],[1,4,3,0],[0,1,2,0],[1,2,2,1],[0,4,2,1]],"par":4}],"moderate":[{"v":[[2,1,2,1],[3,5,2,0],[1,4,2,0],[0,2,2,0],[1,0,2,0],[5,1,3,1],[3,3,2,0],[3,4,2,0],[0,3,2,0],[3,1,2,0],[1,5,2,0],[0,4,2,1],[3,0,2,0]],"par":9},{"v":[[2,0,2,1],[0,1,2,0],[1,3,2,0],[3,2,2,0],[5,2,3,1],[4,0,2,0],[4,3,3,1],[3,0,2,1],[0,4,3,0],[4,1,2,0],[0,2,2,1]],"par":11},{"v":[[2,0,2,1],[3,0,2,0],[4,3,2,1],[3,1,2,0],[0,2,3,0],[0,4,3,0],[2,5,2,0],[3,3,2,1]],"par":12},{"v":[[2,1,2,1],[1,0,3,0],[3,1,2,1],[1,5,2,0],[4,3,3,1],[0,4,2,1],[1,1,2,1],[4,2,2,0],[4,0,2,1],[1,3,2,1],[2,3,2,0]],"par":9},{"v":[[2,0,2,1],[4,2,2,1],[0,2,2,0],[3,1,3,1],[1,3,2,0],[5,1,2,1],[2,4,2,0],[4,5,2,0],[3,0,3,0],[1,4,2,1],[2,5,2,0]],"par":9},{"v":[[2,0,2,1],[3,5,3,0],[1,2,3,0],[3,3,2,1],[0,4,2,0],[4,2,3,1],[0,3,2,0],[5,2,3,1]],"par":10},{"v":[[2,1,2,1],[2,0,2,0],[3,2,3,0],[2,4,2,0],[2,3,2,0],[4,3,2,0],[2,5,2,0],[1,2,2,1],[5,4,2,1],[4,4,2,1],[0,1,2,0],[0,3,2,1]],"par":13},{"v":[[2,0,2,1],[1,5,2,0],[3,4,2,1],[0,4,2,0],[0,1,2,0],[0,2,2,1],[4,0,3,1],[5,1,2,1],[1,3,2,0],[5,3,2,1],[3,1,2,1],[1,2,2,0],[4,5,2,0]],"par":11},{"v":[[2,0,2,1],[4,4,2,0],[0,2,2,0],[4,1,2,1],[0,0,2,1],[3,0,3,0],[1,4,2,1],[2,2,2,0],[3,5,2,0],[2,3,2,0]],"par":9},{"v":[[2,0,2,1],[0,5,2,0],[4,3,3,1],[3,2,2,1],[0,0,2,1],[1,2,2,0],[3,4,2,1],[1,3,2,0],[3,1,2,0],[5,3,2,1],[0,4,2,0],[0,2,2,1],[3,0,2,0]],"par":14}],"hard":[{"v":[[2,0,2,1],[0,5,2,0],[3,0,2,1],[3,4,2,0],[1,0,2,1],[4,3,2,0],[1,4,2,0],[4,1,2,1],[1,2,2,0],[0,0,3,1],[1,3,2,0],[4,0,2,0]],"par":22},{"v":[[2,1,2,1],[3,3,2,0],[4,4,2,1],[5,0,2,1],[2,0,3,0],[4,2,2,0],[0,2,3,1],[1,2,2,1],[1,5,3,0],[0,0,2,1],[2,4,2,0],[5,3,3,1],[1,0,2,1]],"par":17},{"v":[[2,2,2,1],[3,1,2,1],[4,2,2,0],[2,0,3,0],[1,5,2,0],[0,2,3,1],[4,3,2,1],[1,2,2,1],[1,1,2,0],[5,3,2,1],[1,4,3,0],[5,0,2,1]],"par":22},{"v":[[2,1,2,1],[4,3,2,0],[3,2,2,0],[0,0,2,0],[3,3,2,1],[5,0,3,1],[3,0,2,0],[0,4,3,0],[4,4,2,1],[1,3,2,0],[3,1,2,0],[0,1,2,1]],"par":16},{"v":[[2,2,2,1],[1,0,2,0],[0,1,3,0],[0,3,3,1],[4,3,3,1],[2,4,2,0],[3,1,3,1],[3,0,2,0],[1,2,2,1],[5,0,2,1],[4,2,2,0],[5,3,2,1],[1,5,3,0]],"par":18},{"v":[[2,2,2,1],[0,4,3,0],[3,4,2,1],[2,1,2,0],[4,1,2,1],[2,0,2,0],[4,3,2,0],[5,4,2,1],[0,0,2,1],[4,0,2,0],[1,1,2,1],[4,4,2,1]],"par":16},{"v":[[2,0,2,1],[4,3,2,1],[5,4,2,1],[0,4,2,1],[5,1,3,1],[4,0,2,1],[1,5,3,0],[0,0,2,0],[0,1,2,1],[1,2,2,0],[3,0,3,1],[1,4,2,0]],"par":16},{"v":[[2,0,2,1],[1,0,2,1],[1,4,2,0],[5,3,2,1],[0,2,2,0],[0,3,3,1],[3,1,2,1],[4,4,2,1],[4,0,2,0],[2,3,2,0],[2,5,2,0],[5,1,2,1],[4,2,2,1]],"par":18},{"v":[[2,0,2,1],[4,1,3,1],[0,3,2,1],[1,1,3,1],[0,5,3,0],[5,2,2,1],[2,3,2,0],[4,0,2,0],[3,4,2,1],[0,0,2,0],[2,2,2,0],[1,4,2,0],[5,4,2,1]],"par":16},{"v":[[2,0,2,1],[1,5,2,0],[1,2,2,0],[3,2,2,0],[4,5,2,0],[0,4,3,0],[3,0,2,0],[0,3,2,0],[5,1,3,1],[0,0,3,1],[3,4,2,1]],"par":17}],"extreme":[{"v":[[2,2,2,1],[4,0,3,1],[0,1,2,0],[3,5,3,0],[1,4,2,1],[4,4,2,0],[0,2,2,0],[5,1,2,1],[3,2,2,1],[0,4,2,1],[1,0,2,0],[2,4,2,0]],"par":28},{"v":[[2,0,2,1],[1,4,2,0],[5,2,2,1],[3,3,2,0],[3,4,2,1],[5,0,2,1],[0,5,3,0],[0,2,3,1],[1,1,2,1],[0,0,2,0],[4,4,2,1],[3,2,2,0],[1,3,2,0]],"par":35},{"v":[[2,0,2,1],[0,1,2,1],[4,0,3,1],[5,2,3,1],[4,5,2,0],[1,2,2,0],[1,5,2,0],[0,3,2,0],[0,4,2,1],[0,0,2,0],[3,4,2,1],[1,4,2,0],[3,2,2,1]],"par":28},{"v":[[2,0,2,1],[1,4,2,0],[3,0,2,1],[5,0,2,1],[1,5,3,0],[2,2,2,0],[5,2,3,1],[0,0,2,0],[0,4,2,1],[3,3,2,1],[1,3,2,0],[4,3,2,1],[0,2,2,1]],"par":36},{"v":[[2,0,2,1],[0,4,2,1],[2,4,2,0],[4,1,2,1],[2,5,2,0],[1,3,3,0],[1,2,2,0],[5,2,3,1],[0,0,3,1],[4,5,2,0],[3,0,2,0],[1,4,2,1],[3,1,2,1]],"par":29},{"v":[[2,0,2,1],[2,5,2,0],[0,4,3,0],[0,3,2,0],[3,2,2,0],[3,0,2,1],[2,3,2,0],[4,3,2,1],[1,0,3,1],[0,0,2,1],[5,2,2,1],[4,0,2,0]],"par":24},{"v":[[2,0,2,1],[1,1,2,1],[1,4,3,0],[4,3,2,1],[3,2,2,0],[0,1,3,1],[1,5,2,0],[2,3,2,0],[3,5,2,0],[3,0,3,0],[5,1,3,1],[0,0,2,0],[3,1,2,0]],"par":24},{"v":[[2,1,2,1],[0,5,3,0],[3,4,2,1],[5,2,3,1],[0,3,2,0],[3,3,2,0],[3,2,2,0],[0,4,3,0],[0,0,2,1],[4,1,2,0],[4,4,2,1],[3,0,2,0],[1,0,2,0]],"par":24},{"v":[[2,0,2,1],[0,3,3,0],[5,1,2,1],[3,1,2,1],[0,1,2,1],[1,5,2,0],[3,5,2,0],[3,4,2,0],[4,1,3,1],[1,2,2,0],[0,4,2,1],[0,0,2,0]],"par":24},{"v":[[2,2,2,1],[3,5,2,0],[0,2,2,1],[0,4,2,1],[4,2,2,0],[5,3,2,1],[1,4,3,0],[1,1,2,0],[4,3,2,1],[0,0,3,0],[5,0,2,1],[3,0,2,1]],"par":23}]};
+
+/* ============ carpool puzzles: cars [row,col,len,horiz,color]; q = rider queue; sp = parking spaces.
+   Every jam ships with a machine-verified winning line (witness replay + exhaustive DFS). ============ */
+var CARPOOL = {"easy":[{"cars":[[3,5,2,0,0],[1,4,2,1,2],[4,1,2,1,0],[0,1,2,0,1],[5,0,2,1,2],[5,4,2,1,2],[1,0,2,0,1]],"q":[2,2,2,0,0,2,1,2,1,2,0,1,0,1],"sp":4},{"cars":[[3,0,2,1,2],[3,3,3,0,1],[1,3,2,0,0],[0,1,2,0,2],[5,4,2,1,0],[0,2,2,0,2],[2,0,2,1,2]],"q":[2,2,2,2,0,2,0,1,1,1,2,0,0,2,2],"sp":4},{"cars":[[4,4,2,0,2],[0,3,3,0,2],[3,1,2,1,2],[0,1,2,0,1],[1,4,2,0,2],[4,2,2,0,0],[3,5,3,0,1]],"q":[2,2,2,1,1,2,0,0,2,2,2,2,2,1,1,1],"sp":4},{"cars":[[0,3,3,0,1],[1,5,3,0,2],[5,0,2,1,0],[3,4,2,0,1],[4,5,2,0,1],[3,2,2,1,1],[0,0,3,1,2],[1,0,2,0,2]],"q":[2,2,2,1,1,2,2,1,1,1,1,2,0,2,0,2,1,1,1],"sp":4},{"cars":[[5,1,2,1,1],[3,1,2,1,0],[4,4,2,0,2],[0,2,3,0,0],[1,4,2,1,1],[2,3,2,0,2],[2,4,2,0,0],[4,3,2,0,2]],"q":[2,2,0,2,0,2,1,0,0,0,0,0,2,2,1,1,1],"sp":4},{"cars":[[1,0,2,1,1],[5,3,3,1,1],[2,0,2,0,0],[1,2,2,1,1],[0,5,2,0,1],[3,2,3,1,0],[0,0,3,1,2],[0,4,2,0,2]],"q":[1,1,1,0,0,1,2,2,1,1,0,1,2,2,1,1,0,2,0],"sp":4},{"cars":[[1,4,3,0,1],[2,0,3,0,0],[2,1,2,0,2],[5,1,2,1,1],[1,2,2,0,1],[4,2,2,1,1],[2,5,2,0,0]],"q":[1,1,2,1,2,1,0,0,0,0,1,1,1,1,0,1],"sp":4},{"cars":[[1,3,3,0,1],[1,4,3,0,2],[4,1,2,0,0],[0,0,3,0,2],[0,1,2,1,2],[0,4,2,1,0],[5,2,2,1,0]],"q":[0,0,2,2,2,2,0,0,0,2,1,2,0,2,1,2,1],"sp":4},{"cars":[[1,2,2,1,1],[3,2,2,0,0],[4,0,2,1,2],[5,3,2,1,2],[5,0,2,1,0],[0,0,2,1,2],[3,3,2,1,1],[4,3,2,1,1]],"q":[2,2,0,1,0,2,2,1,0,1,0,1,1,2,2,1],"sp":4},{"cars":[[2,3,3,0,0],[3,1,2,0,0],[0,2,3,1,1],[1,4,2,0,2],[0,1,3,0,0],[5,2,2,1,0],[4,4,2,0,0]],"q":[0,0,0,0,0,2,0,2,1,0,0,1,0,0,1,0,0],"sp":4}],"moderate":[{"cars":[[1,2,2,1,0],[5,2,3,1,0],[3,0,2,0,3],[2,2,2,0,0],[3,5,2,0,0],[2,3,2,1,1],[2,1,2,0,2],[0,3,2,1,3],[5,0,2,1,0]],"q":[0,0,3,3,0,1,1,0,0,0,0,0,0,3,3,0,2,2,0],"sp":3},{"cars":[[1,2,3,0,1],[0,5,2,0,1],[1,3,2,1,2],[5,4,2,1,3],[3,0,2,1,2],[4,1,2,1,3],[2,4,2,0,0],[0,2,2,1,3],[2,0,2,1,1]],"q":[3,3,3,3,1,1,1,1,1,2,2,3,3,0,0,2,1,2,1],"sp":3},{"cars":[[0,4,2,1,1],[4,4,2,1,3],[1,5,3,0,2],[1,4,3,0,0],[1,3,2,0,0],[0,2,2,0,0],[4,1,2,0,0],[5,2,2,1,0],[5,4,2,1,0]],"q":[0,0,0,0,0,0,0,1,1,0,3,3,0,2,0,2,0,0,0,2],"sp":3},{"cars":[[0,1,2,0,1],[5,3,2,1,0],[4,3,2,1,3],[1,0,2,0,3],[1,3,3,1,1],[2,4,2,0,0],[2,1,3,1,2],[5,1,2,1,1],[0,2,2,0,1]],"q":[3,3,1,1,1,1,1,3,3,1,1,0,0,0,0,2,2,2,1,1],"sp":3},{"cars":[[4,4,2,0,1],[1,3,2,0,1],[4,1,2,1,2],[5,2,2,1,1],[0,0,3,0,3],[1,1,2,0,3],[0,2,3,1,0],[3,0,2,0,1],[2,4,2,1,3]],"q":[3,3,3,3,1,1,3,1,1,0,0,0,1,1,2,3,2,1,3,1],"sp":3},{"cars":[[4,3,2,0,1],[3,1,3,0,0],[4,2,2,0,3],[2,0,2,0,3],[2,3,2,0,2],[2,1,2,1,1],[1,2,2,1,1],[0,3,2,1,1],[0,0,2,1,1]],"q":[3,1,3,1,1,1,1,1,1,1,0,0,0,1,1,2,2,3,3],"sp":3},{"cars":[[3,2,2,0,3],[1,5,2,0,0],[5,0,3,1,1],[4,4,2,1,0],[0,4,2,0,1],[4,3,2,0,2],[2,0,2,1,0],[3,3,2,1,0],[1,3,2,0,0]],"q":[0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,3,3,2,2],"sp":3},{"cars":[[1,2,2,1,3],[2,1,2,0,1],[3,0,2,0,3],[1,4,2,0,1],[0,3,2,1,0],[0,0,2,0,3],[5,1,3,1,2],[0,5,2,0,3],[2,2,3,0,2]],"q":[3,3,1,1,2,2,2,3,3,3,3,2,2,2,3,3,0,0,1,1],"sp":3},{"cars":[[2,5,2,0,3],[0,3,2,0,1],[3,4,2,0,1],[4,2,2,0,1],[4,0,2,1,3],[1,4,2,1,3],[4,3,2,0,2],[2,0,2,0,0],[2,2,3,1,2]],"q":[3,3,1,1,3,3,1,1,2,2,3,3,2,2,2,1,1,0,0],"sp":3},{"cars":[[1,2,2,0,0],[2,0,2,0,2],[0,1,2,1,2],[4,1,2,0,3],[2,5,3,0,3],[3,2,3,1,3],[5,2,3,1,1],[1,4,2,1,3],[4,2,2,1,3]],"q":[1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,2,0,0,2,3,3],"sp":3}],"hard":[{"cars":[[3,3,2,0,4],[2,4,2,0,3],[1,3,2,1,4],[2,1,3,1,2],[5,1,2,1,1],[1,0,2,1,4],[5,4,2,1,0],[4,1,2,1,2],[0,1,2,1,1],[2,0,2,0,4],[4,0,2,0,0]],"q":[4,0,0,4,1,1,0,0,4,4,4,4,2,2,3,3,4,4,2,2,2,1,1],"sp":3},{"cars":[[1,0,2,0,0],[3,4,3,0,2],[2,2,2,0,1],[2,5,3,0,3],[2,1,2,0,2],[1,1,2,1,4],[4,2,2,1,2],[1,3,2,0,2],[0,3,3,1,0],[5,1,2,1,2],[4,0,2,1,4]],"q":[2,2,0,0,2,0,0,0,3,3,3,2,2,2,2,2,2,4,4,2,4,2,4,1,1],"sp":3},{"cars":[[5,3,3,1,2],[3,3,2,0,2],[5,0,2,1,4],[2,1,2,1,4],[1,3,3,1,2],[0,2,2,1,2],[0,0,3,0,1],[3,0,2,0,0],[2,4,2,0,0],[0,1,2,0,4],[3,1,2,0,3]],"q":[4,2,4,2,2,2,2,0,0,4,4,2,2,2,2,2,1,1,3,3,4,1,0,4,0],"sp":3},{"cars":[[3,1,2,1,4],[2,4,2,0,1],[0,1,2,1,4],[3,5,2,0,2],[0,5,2,0,0],[2,0,2,0,2],[4,1,2,1,4],[0,0,2,0,2],[1,1,3,1,1],[0,3,2,1,3],[2,2,2,1,4]],"q":[2,2,0,0,2,2,1,1,4,4,4,4,4,4,2,2,1,4,1,1,3,3,4],"sp":3},{"cars":[[0,3,2,1,0],[2,3,2,0,2],[1,4,3,0,3],[5,3,2,1,3],[4,4,2,1,1],[2,0,3,0,3],[3,1,2,1,4],[1,2,2,1,4],[2,1,2,1,3],[2,5,2,0,3],[5,1,2,1,3],[1,0,2,1,4]],"q":[3,3,3,0,0,3,3,1,3,3,1,4,4,3,3,2,2,3,3,4,3,3,3,4,4,4],"sp":3},{"cars":[[2,3,3,1,3],[3,2,3,1,0],[0,3,2,0,2],[0,1,2,0,2],[3,0,2,0,4],[4,3,2,1,4],[3,5,3,0,3],[4,1,2,1,2],[0,2,2,0,3],[2,0,2,1,3],[5,2,2,1,2],[5,0,2,1,1]],"q":[3,3,2,3,2,3,2,2,3,1,1,3,3,2,2,3,3,3,4,0,4,4,0,0,4,2,2],"sp":3},{"cars":[[0,5,2,0,4],[0,2,2,0,4],[4,0,2,1,3],[1,0,2,0,2],[5,0,2,1,4],[3,2,3,1,4],[2,1,2,0,0],[0,4,3,0,4],[1,3,2,0,2],[5,2,3,1,4],[4,3,3,1,1]],"q":[0,4,4,0,4,4,4,3,3,4,4,2,4,2,4,4,4,4,2,2,1,1,1,4,4,4],"sp":3},{"cars":[[0,1,2,0,2],[2,3,2,1,4],[1,2,2,0,1],[4,2,2,1,4],[1,0,3,0,3],[2,5,3,0,1],[2,1,3,0,1],[1,3,2,1,4],[5,3,2,1,1],[0,2,2,1,0],[3,2,2,1,4]],"q":[0,0,1,1,1,4,3,3,3,4,1,1,1,1,4,4,2,4,2,1,1,4,4,4,1],"sp":3},{"cars":[[1,3,2,0,3],[1,4,2,1,1],[4,1,2,1,1],[2,4,2,0,2],[1,2,3,0,0],[0,0,3,1,0],[1,1,3,0,0],[1,0,3,0,4],[4,5,2,0,3],[4,0,2,0,1],[5,2,2,1,1]],"q":[3,3,1,1,1,1,3,3,1,2,1,2,1,1,4,0,0,4,0,4,0,0,0,0,0,0],"sp":3},{"cars":[[4,3,2,1,1],[3,0,2,0,1],[2,0,2,1,2],[4,2,2,0,3],[1,2,2,1,1],[2,3,2,0,1],[0,4,2,0,0],[5,0,2,1,2],[0,2,2,1,1],[0,1,2,0,0],[4,5,2,0,4]],"q":[0,0,2,2,1,1,3,0,0,1,3,1,1,1,2,1,2,1,1,4,1,4],"sp":3}],"extreme":[{"cars":[[3,2,2,0,3],[5,2,2,1,4],[0,1,2,0,2],[4,0,2,0,1],[3,1,3,0,0],[0,3,2,0,0],[4,3,2,1,5],[3,4,2,1,1],[1,2,2,0,0],[1,5,2,0,3],[1,4,2,0,3],[1,0,3,0,3],[5,4,2,1,3],[0,4,2,1,1]],"q":[3,3,3,1,1,3,3,3,3,1,1,1,0,0,1,0,0,4,4,3,0,0,3,0,5,3,3,5,2,2],"sp":2},{"cars":[[2,4,3,0,1],[3,5,3,0,4],[3,0,2,1,3],[4,3,2,0,3],[0,5,2,0,0],[3,2,2,1,3],[0,3,3,0,3],[2,1,2,1,0],[0,2,2,0,5],[5,0,2,1,0],[4,1,2,1,0],[1,0,2,1,2],[0,4,2,0,2],[0,0,2,1,4]],"q":[2,2,4,3,4,3,0,0,0,0,4,2,1,2,1,1,4,4,3,3,0,0,5,5,3,3,0,0,3,3,3],"sp":2},{"cars":[[5,2,3,1,1],[0,4,2,1,3],[3,4,2,1,3],[0,0,2,1,0],[0,2,2,1,5],[1,0,3,1,0],[1,5,2,0,2],[5,0,2,1,4],[4,2,2,1,0],[4,5,2,0,2],[2,1,3,0,1],[2,2,3,1,3]],"q":[0,0,4,4,3,3,2,2,3,3,0,0,2,2,3,0,0,3,3,1,0,1,1,5,5,1,1,1],"sp":2},{"cars":[[1,2,3,0,2],[0,3,2,1,0],[1,4,3,0,1],[3,1,2,0,5],[1,0,2,0,4],[5,3,3,1,0],[5,0,3,1,5],[0,0,2,1,0],[2,5,2,0,3],[4,2,2,1,1],[1,1,2,0,1],[1,3,2,0,3],[0,5,2,0,0]],"q":[0,0,0,0,4,3,3,5,4,5,5,5,0,5,0,1,2,2,2,0,1,0,1,0,1,1,1,1,3,3],"sp":2},{"cars":[[0,0,2,1,5],[2,1,2,0,4],[3,2,2,1,0],[0,3,2,1,4],[5,2,2,1,1],[4,0,2,0,5],[1,5,2,0,3],[2,4,2,0,3],[4,1,2,0,3],[2,0,2,0,2],[1,3,2,1,4],[2,2,2,1,1]],"q":[3,4,4,3,2,5,5,4,2,4,1,5,5,1,3,3,3,3,4,4,1,0,1,0],"sp":2},{"cars":[[0,4,2,0,0],[5,0,3,1,0],[4,5,2,0,4],[2,0,3,1,0],[0,3,2,0,3],[3,0,2,0,1],[4,2,2,1,2],[2,3,3,1,0],[1,0,3,1,1],[3,2,3,1,1],[5,3,2,1,5],[0,0,3,1,0],[3,1,2,0,5]],"q":[0,0,0,0,0,4,4,3,5,3,0,5,1,0,0,1,5,5,2,1,1,2,1,1,1,1,0,0,0,0,0,0],"sp":2},{"cars":[[2,1,2,1,5],[4,3,2,0,4],[3,5,3,0,0],[1,1,3,1,0],[2,0,2,0,1],[2,4,2,0,0],[0,1,2,1,4],[0,3,2,1,2],[3,2,2,1,2],[4,1,2,0,5],[4,4,2,0,0],[0,5,2,0,3],[4,0,2,0,0]],"q":[1,5,1,5,3,3,5,5,2,2,4,2,4,4,2,4,0,0,0,0,0,0,0,0,0,0,0,0],"sp":2},{"cars":[[2,1,3,1,1],[2,5,3,0,0],[3,0,2,0,1],[0,3,2,1,5],[2,4,3,0,3],[5,1,2,1,4],[0,0,2,1,0],[1,0,2,1,2],[1,2,2,1,2],[4,1,2,1,2],[5,3,3,1,3],[0,5,2,0,1]],"q":[4,2,2,4,1,1,0,1,1,0,5,5,0,1,1,1,3,3,3,2,3,2,0,3,0,3,2,2],"sp":2},{"cars":[[1,4,2,1,5],[2,5,3,0,1],[1,1,3,1,3],[0,4,2,1,2],[3,4,2,0,5],[3,3,2,0,0],[3,1,3,0,2],[0,2,2,1,5],[2,2,2,1,1],[2,0,2,1,2],[4,0,2,0,2],[0,0,2,0,1],[3,2,2,0,4]],"q":[4,4,0,2,2,5,5,2,0,3,2,3,2,3,1,1,2,5,5,5,5,2,2,2,1,1,1,1,1],"sp":2},{"cars":[[0,4,2,1,4],[3,5,3,0,0],[5,1,3,1,0],[1,0,2,0,5],[2,3,2,0,0],[2,1,2,1,2],[4,0,2,0,1],[3,0,2,1,0],[1,4,3,0,5],[0,2,2,0,1],[4,2,3,1,1],[0,3,2,0,0],[0,1,2,0,2],[1,5,2,0,3]],"q":[2,2,0,0,0,0,1,1,0,0,0,5,1,5,1,0,2,2,0,1,5,1,5,1,5,4,4,0,0,0,3,3],"sp":2}]};
 
 var MODES = ["easy","moderate","hard","extreme"];
 var MODE_LABEL = {easy:"Easy", moderate:"Moderate", hard:"Hard", extreme:"Extreme"};
@@ -344,23 +419,39 @@ var CAR_COLORS = [
   ["#B99A4F","#A98A3F","#856C2F"],
   ["#A57B7B","#946B6B","#755353"]
 ];
+/* carpool color groups: [light, mid, dark] */
+var CP_COLORS = [
+  ["#E8503F","#D93A2B","#A82A1F"],   // red
+  ["#5F8FC4","#4E7DB3","#3A5F8A"],   // blue
+  ["#F0C34E","#DFA92A","#B08420"],   // yellow
+  ["#57AC66","#3E9B4F","#2E763B"],   // green
+  ["#9C82BC","#8C6BB1","#6B4F8A"],   // purple
+  ["#EC9350","#E07B39","#B35C26"]    // orange
+];
 
-/* ============ state ============ */
-var mode = "easy", puzIdx = 0, lbMode = "easy";
-var vehicles = [];   // fixed [row,col,len,h] of current puzzle
-var coords = [];     // live variable coord per vehicle
-var par = 0;
-var history = [];    // {i, from, to}
+/* ============ shared state ============ */
+var variant = "classic";
+var mode = "easy", puzIdx = 0;
+var lbVariant = "classic", lbMode = "easy";
 var startTime = null, elapsedMs = 0, timerId = null, winning = false;
 var muted = localStorage.getItem("cj_muted") === "1";
-var selected = -1;
 
 var board = document.getElementById("board");
+var boardFrame = document.getElementById("boardFrame");
 var stMoves = document.getElementById("stMoves"), stPar = document.getElementById("stPar"), stTime = document.getElementById("stTime");
+var labA = document.getElementById("labA"), labB = document.getElementById("labB");
 var puzline = document.getElementById("puzline");
+var dock = document.getElementById("dock");
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* ============ audio (all synthesized — no external files) ============ */
+/* classic state */
+var vehicles = [], coords = [], par = 0, history = [], selected = -1;
+
+/* carpool state */
+var cp = null;      // {cars, alive[], slots[], queue[], qi, boarded, extracted}
+var cpBusy = false, cpTimers = [];
+
+/* ============ audio (all synthesized) ============ */
 var actx = null;
 function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state==="suspended") actx.resume(); return actx; }
 function tone(freq,dur,type,vol,when,slide){
@@ -380,24 +471,51 @@ function sDrop(){ tone(220,0.07,"triangle",0.12); tone(330,0.05,"triangle",0.06,
 function sBlocked(){ tone(80,0.18,"sine",0.28,0,55); tone(160,0.06,"square",0.05); }
 function sUndo(){ tone(330,0.06,"triangle",0.08); tone(220,0.06,"triangle",0.08,0.06); }
 function sClick(){ tone(440,0.04,"square",0.04); }
-function sWin(isRecord){
-  // double horn
+function sWhoosh(){ tone(500,0.28,"sawtooth",0.06,0,140); tone(260,0.22,"triangle",0.05,0,90); }
+function sTick(i){ tone(620+Math.min(i,10)*45,0.05,"square",0.07); }
+function sDepart(){ tone(110,0.45,"sawtooth",0.09,0,330); tone(440,0.1,"triangle",0.05,0.05); }
+function sLose(){ tone(392,0.25,"sawtooth",0.12); tone(311,0.3,"sawtooth",0.12,0.24); tone(233,0.55,"sawtooth",0.13,0.5); }
+function sWin(){
   tone(440,0.14,"sawtooth",0.10); tone(554,0.14,"sawtooth",0.10);
   tone(440,0.22,"sawtooth",0.10,0.22); tone(554,0.22,"sawtooth",0.10,0.22);
-  // engine pull-away
   tone(90,0.9,"sawtooth",0.06,0.5,220);
-  // fanfare
   var notes=[523,659,784,1047], i;
   for(i=0;i<notes.length;i++) tone(notes[i],0.16,"triangle",0.12,0.9+i*0.11);
-  if(isRecord){ for(i=0;i<3;i++) tone(1319+i*220,0.1,"sine",0.08,1.5+i*0.08); }
 }
 
-/* ============ helpers ============ */
-function cellPx(){ return board.clientWidth / N; }
+/* ============ shared helpers ============ */
 function fmtTime(ms){
   var s = Math.floor(ms/1000);
   return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
 }
+function tickTimer(){ stTime.textContent = fmtTime(elapsedMs + (startTime? Date.now()-startTime : 0)); }
+function startTimer(){ if(startTime===null && !winning){ startTime = Date.now(); timerId = setInterval(tickTimer, 250); } }
+function stopTimer(){ if(startTime!==null){ elapsedMs += Date.now()-startTime; startTime=null; } clearInterval(timerId); tickTimer(); }
+function resetTimer(){ stopTimer(); elapsedMs = 0; startTime = null; stTime.textContent = "0:00"; }
+function shakeBoard(){ board.classList.remove("shake"); void board.offsetWidth; board.classList.add("shake"); }
+function carEl(i){ return board.querySelector('.car[data-i="'+i+'"]'); }
+function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+function grad(pal){ return "linear-gradient(160deg,"+pal[0]+","+pal[1]+" 60%,"+pal[2]+")"; }
+function makeCarEl(i, h, len, background, hero){
+  var el = document.createElement("div");
+  el.className = "car " + (h?"h":"v") + (len===3?" truck":"") + (hero?" hero":"");
+  el.dataset.i = i;
+  var body = document.createElement("div"); body.className="body";
+  if(background) body.style.background = background;
+  var roof = document.createElement("div"); roof.className="roof";
+  body.appendChild(roof); el.appendChild(body);
+  return el;
+}
+function placeCarEl(el, r, c, len, h){
+  el.style.left  = (c/N*100)+"%";
+  el.style.top   = (r/N*100)+"%";
+  el.style.width = ((h?len:1)/N*100)+"%";
+  el.style.height= ((h?1:len)/N*100)+"%";
+}
+
+/* ==================================================================== */
+/* ============================ CLASSIC =============================== */
+/* ==================================================================== */
 function occupancy(exceptI){
   var g = []; for(var k=0;k<N*N;k++) g.push(-1);
   for(var i=0;i<vehicles.length;i++){
@@ -409,84 +527,71 @@ function occupancy(exceptI){
   return g;
 }
 function freeRange(i){
-  // returns [min,max] variable coord vehicle i can occupy given others fixed
   var v=vehicles[i], h=v[3], len=v[2], fixed = h? v[0] : v[1];
   var g = occupancy(i), pos = coords[i], lo = pos, hi = pos;
   while(lo-1 >= 0 && g[(h?fixed:(lo-1))*N + (h?(lo-1):fixed)] === -1) lo--;
   while(hi+len < N && g[(h?fixed:(hi+len))*N + (h?(hi+len):fixed)] === -1) hi++;
   return [lo,hi];
 }
-
-/* ============ rendering ============ */
-function renderBoard(){
+function renderClassic(){
   board.innerHTML = "";
   for(var i=0;i<vehicles.length;i++){
     var v=vehicles[i], h=v[3], len=v[2];
-    var el = document.createElement("div");
-    el.className = "car " + (h?"h":"v") + (len===3?" truck":"") + (i===0?" hero":"");
-    el.dataset.i = i;
-    var body = document.createElement("div"); body.className="body";
-    if(i>0){
-      var pal = CAR_COLORS[(i-1)%CAR_COLORS.length];
-      body.style.background = "linear-gradient(160deg,"+pal[0]+","+pal[1]+" 60%,"+pal[2]+")";
-    }
-    var roof = document.createElement("div"); roof.className="roof";
-    body.appendChild(roof); el.appendChild(body);
+    var bg = i>0 ? grad(CAR_COLORS[(i-1)%CAR_COLORS.length]) : null;
+    var el = makeCarEl(i, h, len, bg, i===0);
     board.appendChild(el);
     positionCar(i, el);
     attachDrag(el, i);
   }
 }
-function carEl(i){ return board.querySelector('.car[data-i="'+i+'"]'); }
 function positionCar(i, el){
   el = el || carEl(i);
   var v=vehicles[i], h=v[3], len=v[2];
   var r = h? v[0] : coords[i], c = h? coords[i] : v[1];
-  el.style.left  = (c/N*100)+"%";
-  el.style.top   = (r/N*100)+"%";
-  el.style.width = ((h?len:1)/N*100)+"%";
-  el.style.height= ((h?1:len)/N*100)+"%";
+  placeCarEl(el, r, c, len, h);
 }
-
 function updateStats(){
-  stMoves.textContent = history.length;
-  stMoves.classList.toggle("over", history.length > par);
-  stPar.textContent = par;
-  document.getElementById("btnUndo").disabled = history.length===0 || winning;
+  if(variant==="classic"){
+    labA.textContent = "Moves"; labB.textContent = "Par";
+    stMoves.className = "val" + (history.length > par ? " over" : "");
+    stMoves.textContent = history.length;
+    stPar.className = "val";
+    stPar.textContent = par;
+    document.getElementById("btnUndo").disabled = history.length===0 || winning;
+  } else {
+    labA.textContent = "Cars"; labB.textContent = "Line";
+    stMoves.className = "val sm";
+    stMoves.textContent = cp.extracted + "/" + cp.cars.length;
+    stPar.className = "val";
+    stPar.textContent = cp.queue.length - cp.qi;
+  }
 }
-function tickTimer(){ stTime.textContent = fmtTime(elapsedMs + (startTime? Date.now()-startTime : 0)); }
-function startTimer(){ if(startTime===null && !winning){ startTime = Date.now(); timerId = setInterval(tickTimer, 250); } }
-function stopTimer(){ if(startTime!==null){ elapsedMs += Date.now()-startTime; startTime=null; } clearInterval(timerId); tickTimer(); }
-
-/* ============ moves ============ */
 function commitMove(i, from, to){
   if(from===to) return;
   var last = history[history.length-1];
   if(last && last.i===i){ last.to = to; if(last.from===last.to) history.pop(); }
   else history.push({i:i, from:from, to:to});
   startTimer(); updateStats();
-  if(i===0 && coords[0] + vehicles[0][2] === N) win();
+  if(i===0 && coords[0] + vehicles[0][2] === N) classicWin();
 }
 function undo(){
-  if(!history.length || winning) return;
+  if(variant!=="classic" || !history.length || winning) return;
   var m = history.pop();
   coords[m.i] = m.from;
   positionCar(m.i);
   sUndo(); updateStats();
 }
-
-/* ============ drag ============ */
 function attachDrag(el, i){
   el.addEventListener("pointerdown", function(e){
-    if(winning) return;
+    if(winning || variant!=="classic") return;
     e.preventDefault();
     audio();
     select(i);
     var h = vehicles[i][3];
-    var cp = cellPx();
+    var cp_ = board.clientWidth / N;
     var startCoord = coords[i];
     var range = freeRange(i);
-    var minD = (range[0]-startCoord)*cp, maxD = (range[1]-startCoord)*cp;
+    var minD = (range[0]-startCoord)*cp_, maxD = (range[1]-startCoord)*cp_;
     var origin = h? e.clientX : e.clientY;
     var bumped = false, movedPx = 0;
     el.classList.add("dragging");
@@ -498,10 +603,8 @@ function attachDrag(el, i){
       var d = Math.max(minD, Math.min(maxD, raw));
       movedPx = d;
       el.style.transform = h? "translateX("+d+"px)" : "translateY("+d+"px)";
-      // bump feedback when pushing hard against an obstacle (not just at rest)
       if(!bumped && (raw < minD-14 || raw > maxD+14)){
-        bumped = true; sBlocked();
-        board.classList.remove("shake"); void board.offsetWidth; board.classList.add("shake");
+        bumped = true; sBlocked(); shakeBoard();
       }
       if(raw >= minD-4 && raw <= maxD+4) bumped = false;
     }
@@ -511,7 +614,7 @@ function attachDrag(el, i){
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onUp);
-      var snapped = startCoord + Math.round(movedPx/cp);
+      var snapped = startCoord + Math.round(movedPx/cp_);
       snapped = Math.max(range[0], Math.min(range[1], snapped));
       if(snapped !== startCoord){
         coords[i] = snapped;
@@ -527,15 +630,13 @@ function attachDrag(el, i){
     el.addEventListener("pointercancel", onUp);
   });
 }
-
-/* keyboard: click to select, arrows to move */
 function select(i){
   if(selected>=0 && carEl(selected)) carEl(selected).classList.remove("selected");
   selected = i;
   if(i>=0 && carEl(i)) carEl(i).classList.add("selected");
 }
 document.addEventListener("keydown", function(e){
-  if(winning || selected<0) return;
+  if(variant!=="classic" || winning || selected<0) return;
   var h = vehicles[selected][3], dir = 0;
   if(h && e.key==="ArrowLeft") dir=-1;
   else if(h && e.key==="ArrowRight") dir=1;
@@ -545,47 +646,308 @@ document.addEventListener("keydown", function(e){
   else return;
   e.preventDefault();
   var range = freeRange(selected), from = coords[selected], to = from+dir;
-  if(to<range[0] || to>range[1]){
-    sBlocked();
-    board.classList.remove("shake"); void board.offsetWidth; board.classList.add("shake");
-    return;
-  }
+  if(to<range[0] || to>range[1]){ sBlocked(); shakeBoard(); return; }
   coords[selected]=to; positionCar(selected); sDrop(); commitMove(selected, from, to);
 });
-
-/* ============ win ============ */
-function win(){
+function classicWin(){
   winning = true;
   stopTimer();
   select(-1);
   var red = carEl(0);
-  sWin(false);
+  sWin();
   if(!reducedMotion){
     red.classList.add("exiting");
     red.style.left = ((coords[0]+3.4)/N*100)+"%";
   }
   confetti();
   var moves = history.length, timeMs = elapsedMs;
-  setTimeout(function(){ showOverlay(moves, timeMs); }, reducedMotion? 200 : 850);
+  setTimeout(function(){
+    showOverlay({
+      win:true, variant:"classic", mode:mode, puz:puzIdx+1,
+      title:"Traffic cleared!",
+      note: (moves-par)<=0 ? '<span class="good">Perfect — you matched par!</span>'
+            : "+"+(moves-par)+" over par on "+MODE_LABEL[mode].toLowerCase()+" jam #"+(puzIdx+1),
+      a:moves, aLab:"Moves", b:par, bLab:"Par", t:timeMs,
+      entry:{n:"", m:moves, p:par, t:timeMs, puz:puzIdx+1, date:Date.now()}
+    });
+  }, reducedMotion? 200 : 850);
 }
-function showOverlay(moves, timeMs){
-  var ov = document.getElementById("overlay");
-  document.getElementById("wMoves").textContent = moves;
-  document.getElementById("wPar").textContent = par;
-  document.getElementById("wTime").textContent = fmtTime(timeMs);
-  var note = document.getElementById("parNote");
-  var d = moves - par;
-  note.innerHTML = d<=0
-    ? '<span class="good">Perfect — you matched par!</span>'
-    : "+" + d + " over par on " + MODE_LABEL[mode].toLowerCase() + " jam #" + (puzIdx+1);
-  document.getElementById("saveRow").style.display = "flex";
-  document.getElementById("savedMsg").style.display = "none";
-  document.getElementById("btnSave").disabled = false;
-  var ni = document.getElementById("nameInput");
-  ni.value = localStorage.getItem("cj_name") || "";
-  ov.classList.add("show");
-  ov.dataset.moves = moves; ov.dataset.time = timeMs;
+function loadClassic(m, idx){
+  var p = PUZZLES[m][idx];
+  vehicles = p.v; par = p.par;
+  coords = vehicles.map(function(v){ return v[3]? v[1] : v[0]; });
+  history = [];
+  select(-1);
+  renderClassic();
+  updateStats();
+  puzline.textContent = MODE_LABEL[m] + " jam #" + (idx+1) + " of " + PUZZLES[m].length + " · par " + p.par;
 }
+
+/* ==================================================================== */
+/* ============================ CARPOOL =============================== */
+/* ==================================================================== */
+function cpGrid(){
+  var g = Array.from({length:N}, function(){ return Array(N).fill(false); });
+  for(var i=0;i<cp.cars.length;i++){
+    if(!cp.alive[i]) continue;
+    var c = cp.cars[i], h = c[3];
+    for(var k=0;k<c[2];k++) g[h? c[0] : c[0]+k][h? c[1]+k : c[1]] = true;
+  }
+  return g;
+}
+function cpExitDir(i){
+  // returns +1 / -1 (clear lane direction along the car's axis) or 0 if blocked
+  var g = cpGrid(), c = cp.cars[i], r=c[0], col=c[1], len=c[2], h=c[3];
+  var fwd = true, back = true, k;
+  if(h){
+    for(k=col+len;k<N;k++) if(g[r][k]){ fwd=false; break; }
+    for(k=0;k<col;k++) if(g[r][k]){ back=false; break; }
+  } else {
+    for(k=r+len;k<N;k++) if(g[k][col]){ fwd=false; break; }
+    for(k=0;k<r;k++) if(g[k][col]){ back=false; break; }
+  }
+  if(fwd && back){
+    var dFwd = h? N-(col+len) : N-(r+len);
+    var dBack = h? col : r;
+    return dFwd<=dBack ? 1 : -1;
+  }
+  return fwd? 1 : (back? -1 : 0);
+}
+function slotEl(k){ return document.getElementById("slots").children[k]; }
+function makePcar(color, cap){
+  var el = document.createElement("div");
+  el.className = "pcar";
+  el.style.background = grad(CP_COLORS[color]);
+  for(var s=0;s<cap;s++){
+    var d = document.createElement("div"); d.className="seat";
+    el.appendChild(d);
+  }
+  return el;
+}
+function renderSlots(){
+  var host = document.getElementById("slots");
+  host.innerHTML = "";
+  for(var k=0;k<cp.sp;k++){
+    var slot = document.createElement("div");
+    slot.className = "slot";
+    var e = cp.slots[k];
+    if(e){
+      var pc = makePcar(e.c, e.cap);
+      for(var s=0;s<e.s;s++) pc.children[s].classList.add("filled");
+      slot.appendChild(pc);
+    }
+    host.appendChild(slot);
+  }
+}
+function renderQueue(){
+  var host = document.getElementById("queueLine");
+  host.innerHTML = "";
+  var remaining = cp.queue.length - cp.qi;
+  var show = Math.min(remaining, 22);
+  for(var j=0;j<show;j++){
+    var p = document.createElement("div");
+    p.className = "person" + (j===0? " front":"");
+    p.style.background = grad(CP_COLORS[cp.queue[cp.qi+j]]);
+    host.appendChild(p);
+  }
+  if(remaining > show){
+    var more = document.createElement("span");
+    more.className = "qmore";
+    more.textContent = "+" + (remaining-show);
+    host.appendChild(more);
+  }
+  document.getElementById("queueCount").textContent =
+    remaining===0 ? "everyone's aboard!" : remaining + " rider" + (remaining===1?"":"s") + " waiting";
+}
+function renderCarpool(){
+  board.innerHTML = "";
+  for(var i=0;i<cp.cars.length;i++){
+    if(!cp.alive[i]) continue;
+    var c = cp.cars[i];
+    var el = makeCarEl(i, c[3], c[2], grad(CP_COLORS[c[4]]), false);
+    board.appendChild(el);
+    placeCarEl(el, c[0], c[1], c[2], c[3]);
+    (function(idx){
+      el.addEventListener("pointerdown", function(e){ e.preventDefault(); cpTap(idx); });
+    })(i);
+  }
+  renderSlots();
+  renderQueue();
+}
+function cpTap(i){
+  if(variant!=="carpool" || winning || cpBusy || !cp.alive[i]) return;
+  audio();
+  var dir = cpExitDir(i);
+  if(dir===0){ sBlocked(); shakeBoard(); return; }
+  var free = -1;
+  for(var k=0;k<cp.sp;k++) if(!cp.slots[k]){ free = k; break; }
+  if(free<0){
+    sBlocked();
+    var sl = document.getElementById("slots");
+    for(var k2=0;k2<sl.children.length;k2++){
+      sl.children[k2].classList.remove("flash"); void sl.children[k2].offsetWidth;
+      sl.children[k2].classList.add("flash");
+    }
+    return;
+  }
+  cpBusy = true;
+  startTimer();
+  var car = cp.cars[i];
+  // --- state: extract + park + resolve boarding, collecting animation events ---
+  cp.alive[i] = false;
+  cp.extracted++;
+  var entry = { c: car[4], cap: car[2], s: 0 };
+  cp.slots[free] = entry;
+  var events = [];
+  while(cp.qi < cp.queue.length){
+    var want = cp.queue[cp.qi], best = -1, bestLeft = 99;
+    for(var k3=0;k3<cp.sp;k3++){
+      var e2 = cp.slots[k3];
+      if(e2 && e2.c===want && e2.s<e2.cap && (e2.cap-e2.s)<bestLeft){ best=k3; bestLeft=e2.cap-e2.s; }
+    }
+    if(best<0) break;
+    var be = cp.slots[best];
+    events.push({type:"board", slot:best, seat:be.s});
+    be.s++;
+    cp.boarded++;
+    if(be.s===be.cap){ events.push({type:"depart", slot:best}); cp.slots[best]=null; }
+    cp.qi++;
+  }
+  // --- visuals ---
+  var el = carEl(i);
+  sWhoosh();
+  var target = dir===1 ? N+0.9 : -(car[2]+0.9);
+  el.classList.add("driveout");
+  if(car[3]) el.style.left = (target/N*100)+"%";
+  else el.style.top = (target/N*100)+"%";
+  var T = function(fn, ms){ cpTimers.push(setTimeout(fn, ms)); };
+  var t = reducedMotion? 120 : 430;
+  T(function(){
+    if(el.parentNode) el.parentNode.removeChild(el);
+    // park the car visually
+    var pc = makePcar(entry.c, entry.cap);
+    pc.classList.add("arrive");
+    slotEl(free).appendChild(pc);
+    sDrop();
+  }, t);
+  t += 260;
+  var ticks = 0;
+  events.forEach(function(ev){
+    if(ev.type==="board"){
+      var tickN = ticks++;
+      T(function(){
+        var host = document.getElementById("queueLine");
+        var dot = host.querySelector(".person");
+        if(dot){ dot.classList.add("hop"); T(function(){ renderQueue(); }, 170); }
+        var se = slotEl(ev.slot).querySelector(".pcar");
+        if(se && se.children[ev.seat]) se.children[ev.seat].classList.add("filled");
+        sTick(tickN);
+        updateStats();
+      }, t);
+      t += 145;
+    } else {
+      T(function(){
+        var pc = slotEl(ev.slot).querySelector(".pcar");
+        if(pc) pc.classList.add("depart");
+        sDepart();
+        T(function(){ var pc2 = slotEl(ev.slot).querySelector(".pcar"); if(pc2) pc2.remove(); }, 360);
+      }, t);
+      t += 320;
+    }
+  });
+  T(function(){
+    cpBusy = false;
+    renderSlots(); renderQueue(); updateStats();
+    if(cp.qi === cp.queue.length) cpWin();
+    else {
+      var allFull = true;
+      for(var k4=0;k4<cp.sp;k4++) if(!cp.slots[k4]) allFull = false;
+      if(allFull) cpLose();
+    }
+  }, t + 60);
+  updateStats();
+}
+function cpWin(){
+  winning = true;
+  stopTimer();
+  sWin();
+  confetti();
+  var timeMs = elapsedMs;
+  setTimeout(function(){
+    showOverlay({
+      win:true, variant:"carpool", mode:mode, puz:puzIdx+1,
+      title:"Everyone's home!",
+      note:'<span class="good">All '+cp.queue.length+' riders carpooled</span> · '+MODE_LABEL[mode].toLowerCase()+' jam #'+(puzIdx+1),
+      a:cp.cars.length, aLab:"Cars", b:cp.queue.length, bLab:"Riders", t:timeMs,
+      entry:{n:"", t:timeMs, riders:cp.queue.length, cars:cp.cars.length, puz:puzIdx+1, date:Date.now()}
+    });
+  }, 500);
+}
+function cpLose(){
+  winning = true;
+  stopTimer();
+  sLose();
+  showOverlay({
+    win:false, variant:"carpool", mode:mode, puz:puzIdx+1,
+    title:"Gridlocked!",
+    note:"Every space is taken and the next rider has no matching car. Retry the jam and mind the line's colors.",
+    a:cp.extracted+"/"+cp.cars.length, aLab:"Cars", b:cp.boarded+"/"+cp.queue.length, bLab:"Riders", t:elapsedMs
+  });
+}
+function loadCarpool(m, idx){
+  var p = CARPOOL[m][idx];
+  cp = {
+    cars: p.cars, sp: p.sp,
+    alive: p.cars.map(function(){ return true; }),
+    slots: [], queue: p.q, qi: 0, boarded: 0, extracted: 0
+  };
+  for(var k=0;k<p.sp;k++) cp.slots.push(null);
+  renderCarpool();
+  updateStats();
+  puzline.textContent = "Carpool " + MODE_LABEL[m].toLowerCase() + " jam #" + (idx+1) + " of " + CARPOOL[m].length +
+    " · " + p.sp + " spaces · " + p.q.length + " riders";
+}
+
+/* ==================================================================== */
+/* ====================== shared lifecycle / UI ======================= */
+/* ==================================================================== */
+var HOWTO = {
+  classic: '<b>Drag cars along their lane</b> to clear a path, then drive the <b style="color:var(--hero)">red car</b> out the exit. Par is the fewest moves possible &mdash; sliding one car any distance counts as one move. You can also click a car and use the arrow keys.',
+  carpool: '<b>Tap a car whose lane is clear</b> and it drives to a parking space. Riders board <b>matching-color cars</b> from the front of the line; a full car drives home and frees its space. Board everyone to win &mdash; but if every space is taken and the next rider has no matching car, you\'re gridlocked.'
+};
+var TAGLINE = {
+  classic: "Car jam puzzles · free the red car",
+  carpool: "Car jam puzzles · carpool the line home"
+};
+function pool(){ return variant==="classic" ? PUZZLES : CARPOOL; }
+function load(m, idx){
+  mode = m; puzIdx = idx;
+  winning = false;
+  cpBusy = false;
+  cpTimers.forEach(clearTimeout); cpTimers = [];
+  resetTimer();
+  boardFrame.classList.toggle("cp", variant==="carpool");
+  dock.hidden = variant!=="carpool";
+  document.getElementById("btnUndo").style.display = variant==="classic" ? "" : "none";
+  document.getElementById("howto").innerHTML = HOWTO[variant];
+  document.getElementById("tagline").textContent = TAGLINE[variant];
+  if(variant==="classic") loadClassic(m, idx);
+  else loadCarpool(m, idx);
+  document.querySelectorAll(".mode").forEach(function(el){
+    el.classList.toggle("on", el.dataset.m===m);
+    el.setAttribute("aria-selected", el.dataset.m===m ? "true":"false");
+  });
+  document.querySelectorAll(".vtab").forEach(function(el){
+    el.classList.toggle("on", el.dataset.v===variant);
+    el.setAttribute("aria-selected", el.dataset.v===variant ? "true":"false");
+  });
+}
+function newJam(){
+  var n = pool()[mode].length, idx;
+  do { idx = Math.floor(Math.random()*n); } while(n>1 && idx===puzIdx);
+  load(mode, idx);
+}
+function resetJam(){ load(mode, puzIdx); }
 
 /* ============ confetti ============ */
 function confetti(){
@@ -622,22 +984,62 @@ function confetti(){
   requestAnimationFrame(frame);
 }
 
+/* ============ overlay ============ */
+var pendingEntry = null, pendingKey = null;
+function showOverlay(o){
+  var ov = document.getElementById("overlay");
+  document.getElementById("card").classList.toggle("lose", !o.win);
+  document.getElementById("winTitle").textContent = o.title;
+  document.getElementById("parNote").innerHTML = o.note;
+  var wA = document.getElementById("wA"), wB = document.getElementById("wB");
+  wA.textContent = o.a; wB.textContent = o.b;
+  wA.className = "val" + (String(o.a).length>3? " sm":"");
+  wB.className = "val" + (String(o.b).length>3? " sm":"");
+  document.getElementById("wALab").textContent = o.aLab;
+  document.getElementById("wBLab").textContent = o.bLab;
+  document.getElementById("wTime").textContent = fmtTime(o.t);
+  var canSave = o.win && o.entry;
+  document.getElementById("saveRow").style.display = canSave ? "flex" : "none";
+  document.getElementById("savedMsg").style.display = "none";
+  document.getElementById("btnSave").disabled = false;
+  document.getElementById("btnReplay").textContent = o.win ? "Replay" : "Retry";
+  if(canSave){
+    pendingEntry = o.entry;
+    pendingKey = (o.variant==="classic"? "" : "cp_") + o.mode;
+    var ni = document.getElementById("nameInput");
+    ni.value = localStorage.getItem("cj_name") || "";
+  } else { pendingEntry = null; pendingKey = null; }
+  ov.classList.add("show");
+}
+
 /* ============ leaderboard ============ */
 function lbLoad(){
   try{ return JSON.parse(localStorage.getItem("cj_lb_v1")) || {}; }catch(e){ return {}; }
 }
 function lbSave(data){ try{ localStorage.setItem("cj_lb_v1", JSON.stringify(data)); }catch(e){} }
-function lbAdd(m, entry){
-  var data = lbLoad();
-  if(!data[m]) data[m] = [];
-  data[m].push(entry);
-  data[m].sort(function(a,b){ return (a.m-a.p)-(b.m-b.p) || a.t-b.t; });
-  data[m] = data[m].slice(0,10);
-  lbSave(data);
-  return data[m].indexOf(entry);
+function lbSorter(key){
+  return key.indexOf("cp_")===0
+    ? function(a,b){ return a.t-b.t; }
+    : function(a,b){ return (a.m-a.p)-(b.m-b.p) || a.t-b.t; };
 }
-function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+function lbAdd(key, entry){
+  var data = lbLoad();
+  if(!data[key]) data[key] = [];
+  data[key].push(entry);
+  data[key].sort(lbSorter(key));
+  data[key] = data[key].slice(0,10);
+  lbSave(data);
+}
 function renderLb(){
+  var vt = document.getElementById("lbVTabs");
+  vt.innerHTML = "";
+  [["classic","Classic"],["carpool","Carpool"]].forEach(function(pair){
+    var b = document.createElement("button");
+    b.className = "lb-tab" + (pair[0]===lbVariant? " on":"");
+    b.textContent = pair[1];
+    b.addEventListener("click", function(){ lbVariant=pair[0]; renderLb(); });
+    vt.appendChild(b);
+  });
   var tabs = document.getElementById("lbTabs");
   tabs.innerHTML = "";
   MODES.forEach(function(m){
@@ -647,46 +1049,35 @@ function renderLb(){
     b.addEventListener("click", function(){ lbMode=m; renderLb(); });
     tabs.appendChild(b);
   });
-  var rows = (lbLoad()[lbMode]||[]).slice(0,8);
+  document.getElementById("lbSub").textContent = lbVariant==="classic"
+    ? "Classic: ranked by moves over par, then time. Stored on this device."
+    : "Carpool: ranked by time. Stored on this device.";
+  var key = (lbVariant==="classic"? "" : "cp_") + lbMode;
+  var rows = (lbLoad()[key]||[]).slice(0,8);
   var host = document.getElementById("lbBody");
   if(!rows.length){
-    host.innerHTML = '<div class="lb-empty">No records yet — clear a '+MODE_LABEL[lbMode].toLowerCase()+' jam to paint your name here.</div>';
+    host.innerHTML = '<div class="lb-empty">No records yet — clear a '+lbVariant+' '+MODE_LABEL[lbMode].toLowerCase()+' jam to paint your name here.</div>';
     return;
   }
-  var html = '<table><thead><tr><th>#</th><th>Driver</th><th>Jam</th><th>Moves</th><th>Time</th></tr></thead><tbody>';
-  rows.forEach(function(r,idx){
-    var d = r.m - r.p;
-    html += '<tr><td class="rank">'+(idx+1)+'</td><td class="name">'+esc(r.n)+'</td><td>#'+r.puz+'</td>'
-         + '<td>'+r.m+' <span class="delta'+(d<=0?' par':'')+'">('+(d<=0?'par':'+'+d)+')</span></td>'
-         + '<td>'+fmtTime(r.t)+'</td></tr>';
-  });
+  var html;
+  if(lbVariant==="classic"){
+    html = '<table><thead><tr><th>#</th><th>Driver</th><th>Jam</th><th>Moves</th><th>Time</th></tr></thead><tbody>';
+    rows.forEach(function(r,idx){
+      var d = r.m - r.p;
+      html += '<tr><td class="rank">'+(idx+1)+'</td><td class="name">'+esc(r.n)+'</td><td>#'+r.puz+'</td>'
+           + '<td>'+r.m+' <span class="delta'+(d<=0?' par':'')+'">('+(d<=0?'par':'+'+d)+')</span></td>'
+           + '<td>'+fmtTime(r.t)+'</td></tr>';
+    });
+  } else {
+    html = '<table><thead><tr><th>#</th><th>Driver</th><th>Jam</th><th>Riders</th><th>Time</th></tr></thead><tbody>';
+    rows.forEach(function(r,idx){
+      html += '<tr><td class="rank">'+(idx+1)+'</td><td class="name">'+esc(r.n)+'</td><td>#'+r.puz+'</td>'
+           + '<td>'+r.riders+' <span class="delta">('+r.cars+' cars)</span></td>'
+           + '<td>'+fmtTime(r.t)+'</td></tr>';
+    });
+  }
   host.innerHTML = html + "</tbody></table>";
 }
-
-/* ============ puzzle lifecycle ============ */
-function loadPuzzle(m, idx){
-  mode = m; puzIdx = idx;
-  var p = PUZZLES[m][idx];
-  vehicles = p.v; par = p.par;
-  coords = vehicles.map(function(v){ return v[3]? v[1] : v[0]; });
-  history = [];
-  winning = false;
-  stopTimer(); elapsedMs = 0; startTime = null; stTime.textContent = "0:00";
-  select(-1);
-  renderBoard();
-  updateStats();
-  puzline.textContent = MODE_LABEL[m] + " jam #" + (idx+1) + " of " + PUZZLES[m].length + " · par " + par;
-  document.querySelectorAll(".mode").forEach(function(el){
-    el.classList.toggle("on", el.dataset.m===m);
-    el.setAttribute("aria-selected", el.dataset.m===m ? "true":"false");
-  });
-}
-function newJam(){
-  var n = PUZZLES[mode].length, idx;
-  do { idx = Math.floor(Math.random()*n); } while(n>1 && idx===puzIdx);
-  loadPuzzle(mode, idx);
-}
-function resetJam(){ loadPuzzle(mode, puzIdx); }
 
 /* ============ wire up ============ */
 var modesHost = document.getElementById("modes");
@@ -697,10 +1088,20 @@ MODES.forEach(function(m){
   b.addEventListener("click", function(){
     sClick();
     lbMode = m;
-    loadPuzzle(m, Math.floor(Math.random()*PUZZLES[m].length));
+    load(m, Math.floor(Math.random()*pool()[m].length));
     renderLb();
   });
   modesHost.appendChild(b);
+});
+document.querySelectorAll(".vtab").forEach(function(b){
+  b.addEventListener("click", function(){
+    if(variant===b.dataset.v) return;
+    sClick();
+    variant = b.dataset.v;
+    lbVariant = variant;
+    load(mode, Math.floor(Math.random()*pool()[mode].length));
+    renderLb();
+  });
 });
 
 document.getElementById("btnNew").addEventListener("click", function(){ sClick(); newJam(); });
@@ -716,13 +1117,16 @@ btnSound.addEventListener("click", function(){
 syncSound();
 
 document.getElementById("btnSave").addEventListener("click", function(){
-  var ov = document.getElementById("overlay");
+  if(!pendingEntry || !pendingKey) return;
   var name = (document.getElementById("nameInput").value || "Anonymous").trim().slice(0,16) || "Anonymous";
   localStorage.setItem("cj_name", name);
-  lbAdd(mode, { n:name, m:+ov.dataset.moves, p:par, t:+ov.dataset.time, puz:puzIdx+1, date:Date.now() });
+  pendingEntry.n = name;
+  lbAdd(pendingKey, pendingEntry);
   document.getElementById("saveRow").style.display = "none";
   document.getElementById("savedMsg").style.display = "block";
-  lbMode = mode;
+  lbVariant = pendingKey.indexOf("cp_")===0 ? "carpool" : "classic";
+  lbMode = pendingKey.replace("cp_","");
+  pendingEntry = null; pendingKey = null;
   renderLb();
   tone(880,0.08,"sine",0.08); tone(1175,0.1,"sine",0.08,0.08);
 });
@@ -738,10 +1142,9 @@ document.getElementById("btnNext").addEventListener("click", function(){
   sClick(); newJam();
 });
 
-/* deselect when clicking empty asphalt */
-board.addEventListener("pointerdown", function(e){ if(e.target===board) select(-1); });
+board.addEventListener("pointerdown", function(e){ if(e.target===board && variant==="classic") select(-1); });
 
-loadPuzzle("easy", Math.floor(Math.random()*PUZZLES.easy.length));
+load("easy", Math.floor(Math.random()*PUZZLES.easy.length));
 renderLb();
 })();
 </script>
