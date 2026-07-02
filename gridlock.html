@@ -222,6 +222,48 @@
   .person.hop{transform:translateY(-26px) scale(.5);opacity:0}
   .qmore{font-family:var(--mono);font-size:11px;color:var(--paint-dim)}
 
+  /* ---------- harbor ---------- */
+  .board-frame.hb #board{
+    background:
+      linear-gradient(to right, rgba(233,230,220,.07) 2px, transparent 2px),
+      linear-gradient(to bottom, rgba(233,230,220,.07) 2px, transparent 2px),
+      repeating-linear-gradient(-18deg, rgba(255,255,255,.035) 0 3px, transparent 3px 15px),
+      linear-gradient(160deg,#1B3B4B 0%,#122B38 55%,#173340 100%);
+    background-size:calc(100%/6) calc(100%/6),calc(100%/6) calc(100%/6),100% 100%,100% 100%;
+    border-color:#4A3A28;
+  }
+  .board-frame.hb .exit-cut{background:linear-gradient(160deg,#1B3B4B,#122B38)}
+  .board-frame.hb .car .body{border-radius:999px;animation:boatbob 2.8s ease-in-out infinite alternate}
+  .board-frame.hb .car .roof{background:rgba(233,230,220,.4);border-radius:999px}
+  @keyframes boatbob{from{transform:translateY(-1px)}to{transform:translateY(1.2px)}}
+  .car.drift{transition:left .55s cubic-bezier(.35,.8,.4,1),top .55s cubic-bezier(.35,.8,.4,1)}
+  .rock{position:absolute;z-index:1;pointer-events:none;display:flex;align-items:center;justify-content:center}
+  .rock::before{
+    content:"";width:66%;height:60%;
+    border-radius:46% 54% 52% 48%/58% 46% 54% 42%;
+    background:radial-gradient(circle at 32% 26%,#7A8087,#4C525A 58%,#31363D);
+    box-shadow:0 3px 7px rgba(0,0,0,.5),inset 0 2px 2px rgba(255,255,255,.22);
+  }
+  .tide{
+    width:min(92vw,460px);margin-top:14px;display:flex;align-items:center;gap:12px;
+    background:var(--asphalt-2);border:2px solid var(--wall);border-radius:4px;
+    padding:8px 14px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+  }
+  .tide[hidden]{display:none}
+  .tide .t-title{font-size:10px;letter-spacing:.18em;color:var(--paint-dim);text-transform:uppercase}
+  .tide .t-pips{display:flex;gap:5px}
+  .tide .pip{width:9px;height:9px;border-radius:50%;border:2px solid #4A505A}
+  .tide .pip.on{background:var(--caution);border-color:var(--caution)}
+  .tide .t-dir{color:var(--caution);font-size:15px;white-space:nowrap}
+  .tide .t-fore{color:var(--paint-dim);margin-left:auto;white-space:nowrap}
+  .tide.surge{animation:tidesurge .6s}
+  @keyframes tidesurge{0%,100%{border-color:var(--wall)}40%{border-color:var(--caution);box-shadow:0 0 14px rgba(242,183,5,.35)}}
+  @media (prefers-reduced-motion:reduce){
+    .board-frame.hb .car .body{animation:none}
+    .car.drift{transition:none}
+    .tide.surge{animation:none}
+  }
+
   /* ---------- leaderboard ---------- */
   .lb{margin-top:44px}
   .lb h2{
@@ -324,6 +366,13 @@
         <div class="exit-tag" aria-hidden="true"><span>EXIT</span><span class="chev">&#9654;</span><span class="chev">&#9654;</span><span class="chev">&#9654;</span></div>
       </div>
 
+      <div id="tide" class="tide" hidden>
+        <span class="t-title">Tide</span>
+        <span class="t-pips" id="tidePips"></span>
+        <span class="t-dir" id="tideDir"></span>
+        <span class="t-fore" id="tideFore"></span>
+      </div>
+
       <div id="dock" class="dock" hidden>
         <div>
           <div class="dock-label"><span>Parking</span><span id="slotHint">tap a car with a clear lane</span></div>
@@ -342,6 +391,7 @@
       <div class="vtabs" id="vtabs" role="tablist" aria-label="Game variant">
         <button class="vtab on" data-v="classic" role="tab">Classic</button>
         <button class="vtab" data-v="carpool" role="tab">Carpool</button>
+        <button class="vtab" data-v="harbor" role="tab">Harbor</button>
       </div>
 
       <div class="modes" id="modes" role="tablist" aria-label="Difficulty"></div>
@@ -371,7 +421,7 @@
     <div class="lb-scroll"><div id="lbBody"></div></div>
   </section>
 
-  <footer>Gridlock &middot; 40 classic + 40 carpool jams &middot; every one machine-verified solvable</footer>
+  <footer>Gridlock &middot; 40 classic + 40 carpool + 40 harbor jams &middot; every one machine-verified solvable</footer>
 </div>
 
 <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
@@ -405,6 +455,11 @@ var PUZZLES = {"easy":[{"v":[[2,0,2,1],[5,0,2,1],[3,1,2,1],[3,5,2,0],[1,3,3,1],[
 /* ============ carpool puzzles: cars [row,col,len,horiz,color]; q = rider queue; sp = parking spaces.
    Every jam ships with a machine-verified winning line (witness replay + exhaustive DFS). ============ */
 var CARPOOL = {"easy":[{"cars":[[3,5,2,0,0],[1,4,2,1,2],[4,1,2,1,0],[0,1,2,0,1],[5,0,2,1,2],[5,4,2,1,2],[1,0,2,0,1]],"q":[2,2,2,0,0,2,1,2,1,2,0,1,0,1],"sp":4},{"cars":[[3,0,2,1,2],[3,3,3,0,1],[1,3,2,0,0],[0,1,2,0,2],[5,4,2,1,0],[0,2,2,0,2],[2,0,2,1,2]],"q":[2,2,2,2,0,2,0,1,1,1,2,0,0,2,2],"sp":4},{"cars":[[4,4,2,0,2],[0,3,3,0,2],[3,1,2,1,2],[0,1,2,0,1],[1,4,2,0,2],[4,2,2,0,0],[3,5,3,0,1]],"q":[2,2,2,1,1,2,0,0,2,2,2,2,2,1,1,1],"sp":4},{"cars":[[0,3,3,0,1],[1,5,3,0,2],[5,0,2,1,0],[3,4,2,0,1],[4,5,2,0,1],[3,2,2,1,1],[0,0,3,1,2],[1,0,2,0,2]],"q":[2,2,2,1,1,2,2,1,1,1,1,2,0,2,0,2,1,1,1],"sp":4},{"cars":[[5,1,2,1,1],[3,1,2,1,0],[4,4,2,0,2],[0,2,3,0,0],[1,4,2,1,1],[2,3,2,0,2],[2,4,2,0,0],[4,3,2,0,2]],"q":[2,2,0,2,0,2,1,0,0,0,0,0,2,2,1,1,1],"sp":4},{"cars":[[1,0,2,1,1],[5,3,3,1,1],[2,0,2,0,0],[1,2,2,1,1],[0,5,2,0,1],[3,2,3,1,0],[0,0,3,1,2],[0,4,2,0,2]],"q":[1,1,1,0,0,1,2,2,1,1,0,1,2,2,1,1,0,2,0],"sp":4},{"cars":[[1,4,3,0,1],[2,0,3,0,0],[2,1,2,0,2],[5,1,2,1,1],[1,2,2,0,1],[4,2,2,1,1],[2,5,2,0,0]],"q":[1,1,2,1,2,1,0,0,0,0,1,1,1,1,0,1],"sp":4},{"cars":[[1,3,3,0,1],[1,4,3,0,2],[4,1,2,0,0],[0,0,3,0,2],[0,1,2,1,2],[0,4,2,1,0],[5,2,2,1,0]],"q":[0,0,2,2,2,2,0,0,0,2,1,2,0,2,1,2,1],"sp":4},{"cars":[[1,2,2,1,1],[3,2,2,0,0],[4,0,2,1,2],[5,3,2,1,2],[5,0,2,1,0],[0,0,2,1,2],[3,3,2,1,1],[4,3,2,1,1]],"q":[2,2,0,1,0,2,2,1,0,1,0,1,1,2,2,1],"sp":4},{"cars":[[2,3,3,0,0],[3,1,2,0,0],[0,2,3,1,1],[1,4,2,0,2],[0,1,3,0,0],[5,2,2,1,0],[4,4,2,0,0]],"q":[0,0,0,0,0,2,0,2,1,0,0,1,0,0,1,0,0],"sp":4}],"moderate":[{"cars":[[1,2,2,1,0],[5,2,3,1,0],[3,0,2,0,3],[2,2,2,0,0],[3,5,2,0,0],[2,3,2,1,1],[2,1,2,0,2],[0,3,2,1,3],[5,0,2,1,0]],"q":[0,0,3,3,0,1,1,0,0,0,0,0,0,3,3,0,2,2,0],"sp":3},{"cars":[[1,2,3,0,1],[0,5,2,0,1],[1,3,2,1,2],[5,4,2,1,3],[3,0,2,1,2],[4,1,2,1,3],[2,4,2,0,0],[0,2,2,1,3],[2,0,2,1,1]],"q":[3,3,3,3,1,1,1,1,1,2,2,3,3,0,0,2,1,2,1],"sp":3},{"cars":[[0,4,2,1,1],[4,4,2,1,3],[1,5,3,0,2],[1,4,3,0,0],[1,3,2,0,0],[0,2,2,0,0],[4,1,2,0,0],[5,2,2,1,0],[5,4,2,1,0]],"q":[0,0,0,0,0,0,0,1,1,0,3,3,0,2,0,2,0,0,0,2],"sp":3},{"cars":[[0,1,2,0,1],[5,3,2,1,0],[4,3,2,1,3],[1,0,2,0,3],[1,3,3,1,1],[2,4,2,0,0],[2,1,3,1,2],[5,1,2,1,1],[0,2,2,0,1]],"q":[3,3,1,1,1,1,1,3,3,1,1,0,0,0,0,2,2,2,1,1],"sp":3},{"cars":[[4,4,2,0,1],[1,3,2,0,1],[4,1,2,1,2],[5,2,2,1,1],[0,0,3,0,3],[1,1,2,0,3],[0,2,3,1,0],[3,0,2,0,1],[2,4,2,1,3]],"q":[3,3,3,3,1,1,3,1,1,0,0,0,1,1,2,3,2,1,3,1],"sp":3},{"cars":[[4,3,2,0,1],[3,1,3,0,0],[4,2,2,0,3],[2,0,2,0,3],[2,3,2,0,2],[2,1,2,1,1],[1,2,2,1,1],[0,3,2,1,1],[0,0,2,1,1]],"q":[3,1,3,1,1,1,1,1,1,1,0,0,0,1,1,2,2,3,3],"sp":3},{"cars":[[3,2,2,0,3],[1,5,2,0,0],[5,0,3,1,1],[4,4,2,1,0],[0,4,2,0,1],[4,3,2,0,2],[2,0,2,1,0],[3,3,2,1,0],[1,3,2,0,0]],"q":[0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,3,3,2,2],"sp":3},{"cars":[[1,2,2,1,3],[2,1,2,0,1],[3,0,2,0,3],[1,4,2,0,1],[0,3,2,1,0],[0,0,2,0,3],[5,1,3,1,2],[0,5,2,0,3],[2,2,3,0,2]],"q":[3,3,1,1,2,2,2,3,3,3,3,2,2,2,3,3,0,0,1,1],"sp":3},{"cars":[[2,5,2,0,3],[0,3,2,0,1],[3,4,2,0,1],[4,2,2,0,1],[4,0,2,1,3],[1,4,2,1,3],[4,3,2,0,2],[2,0,2,0,0],[2,2,3,1,2]],"q":[3,3,1,1,3,3,1,1,2,2,3,3,2,2,2,1,1,0,0],"sp":3},{"cars":[[1,2,2,0,0],[2,0,2,0,2],[0,1,2,1,2],[4,1,2,0,3],[2,5,3,0,3],[3,2,3,1,3],[5,2,3,1,1],[1,4,2,1,3],[4,2,2,1,3]],"q":[1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,2,0,0,2,3,3],"sp":3}],"hard":[{"cars":[[3,3,2,0,4],[2,4,2,0,3],[1,3,2,1,4],[2,1,3,1,2],[5,1,2,1,1],[1,0,2,1,4],[5,4,2,1,0],[4,1,2,1,2],[0,1,2,1,1],[2,0,2,0,4],[4,0,2,0,0]],"q":[4,0,0,4,1,1,0,0,4,4,4,4,2,2,3,3,4,4,2,2,2,1,1],"sp":3},{"cars":[[1,0,2,0,0],[3,4,3,0,2],[2,2,2,0,1],[2,5,3,0,3],[2,1,2,0,2],[1,1,2,1,4],[4,2,2,1,2],[1,3,2,0,2],[0,3,3,1,0],[5,1,2,1,2],[4,0,2,1,4]],"q":[2,2,0,0,2,0,0,0,3,3,3,2,2,2,2,2,2,4,4,2,4,2,4,1,1],"sp":3},{"cars":[[5,3,3,1,2],[3,3,2,0,2],[5,0,2,1,4],[2,1,2,1,4],[1,3,3,1,2],[0,2,2,1,2],[0,0,3,0,1],[3,0,2,0,0],[2,4,2,0,0],[0,1,2,0,4],[3,1,2,0,3]],"q":[4,2,4,2,2,2,2,0,0,4,4,2,2,2,2,2,1,1,3,3,4,1,0,4,0],"sp":3},{"cars":[[3,1,2,1,4],[2,4,2,0,1],[0,1,2,1,4],[3,5,2,0,2],[0,5,2,0,0],[2,0,2,0,2],[4,1,2,1,4],[0,0,2,0,2],[1,1,3,1,1],[0,3,2,1,3],[2,2,2,1,4]],"q":[2,2,0,0,2,2,1,1,4,4,4,4,4,4,2,2,1,4,1,1,3,3,4],"sp":3},{"cars":[[0,3,2,1,0],[2,3,2,0,2],[1,4,3,0,3],[5,3,2,1,3],[4,4,2,1,1],[2,0,3,0,3],[3,1,2,1,4],[1,2,2,1,4],[2,1,2,1,3],[2,5,2,0,3],[5,1,2,1,3],[1,0,2,1,4]],"q":[3,3,3,0,0,3,3,1,3,3,1,4,4,3,3,2,2,3,3,4,3,3,3,4,4,4],"sp":3},{"cars":[[2,3,3,1,3],[3,2,3,1,0],[0,3,2,0,2],[0,1,2,0,2],[3,0,2,0,4],[4,3,2,1,4],[3,5,3,0,3],[4,1,2,1,2],[0,2,2,0,3],[2,0,2,1,3],[5,2,2,1,2],[5,0,2,1,1]],"q":[3,3,2,3,2,3,2,2,3,1,1,3,3,2,2,3,3,3,4,0,4,4,0,0,4,2,2],"sp":3},{"cars":[[0,5,2,0,4],[0,2,2,0,4],[4,0,2,1,3],[1,0,2,0,2],[5,0,2,1,4],[3,2,3,1,4],[2,1,2,0,0],[0,4,3,0,4],[1,3,2,0,2],[5,2,3,1,4],[4,3,3,1,1]],"q":[0,4,4,0,4,4,4,3,3,4,4,2,4,2,4,4,4,4,2,2,1,1,1,4,4,4],"sp":3},{"cars":[[0,1,2,0,2],[2,3,2,1,4],[1,2,2,0,1],[4,2,2,1,4],[1,0,3,0,3],[2,5,3,0,1],[2,1,3,0,1],[1,3,2,1,4],[5,3,2,1,1],[0,2,2,1,0],[3,2,2,1,4]],"q":[0,0,1,1,1,4,3,3,3,4,1,1,1,1,4,4,2,4,2,1,1,4,4,4,1],"sp":3},{"cars":[[1,3,2,0,3],[1,4,2,1,1],[4,1,2,1,1],[2,4,2,0,2],[1,2,3,0,0],[0,0,3,1,0],[1,1,3,0,0],[1,0,3,0,4],[4,5,2,0,3],[4,0,2,0,1],[5,2,2,1,1]],"q":[3,3,1,1,1,1,3,3,1,2,1,2,1,1,4,0,0,4,0,4,0,0,0,0,0,0],"sp":3},{"cars":[[4,3,2,1,1],[3,0,2,0,1],[2,0,2,1,2],[4,2,2,0,3],[1,2,2,1,1],[2,3,2,0,1],[0,4,2,0,0],[5,0,2,1,2],[0,2,2,1,1],[0,1,2,0,0],[4,5,2,0,4]],"q":[0,0,2,2,1,1,3,0,0,1,3,1,1,1,2,1,2,1,1,4,1,4],"sp":3}],"extreme":[{"cars":[[3,2,2,0,3],[5,2,2,1,4],[0,1,2,0,2],[4,0,2,0,1],[3,1,3,0,0],[0,3,2,0,0],[4,3,2,1,5],[3,4,2,1,1],[1,2,2,0,0],[1,5,2,0,3],[1,4,2,0,3],[1,0,3,0,3],[5,4,2,1,3],[0,4,2,1,1]],"q":[3,3,3,1,1,3,3,3,3,1,1,1,0,0,1,0,0,4,4,3,0,0,3,0,5,3,3,5,2,2],"sp":2},{"cars":[[2,4,3,0,1],[3,5,3,0,4],[3,0,2,1,3],[4,3,2,0,3],[0,5,2,0,0],[3,2,2,1,3],[0,3,3,0,3],[2,1,2,1,0],[0,2,2,0,5],[5,0,2,1,0],[4,1,2,1,0],[1,0,2,1,2],[0,4,2,0,2],[0,0,2,1,4]],"q":[2,2,4,3,4,3,0,0,0,0,4,2,1,2,1,1,4,4,3,3,0,0,5,5,3,3,0,0,3,3,3],"sp":2},{"cars":[[5,2,3,1,1],[0,4,2,1,3],[3,4,2,1,3],[0,0,2,1,0],[0,2,2,1,5],[1,0,3,1,0],[1,5,2,0,2],[5,0,2,1,4],[4,2,2,1,0],[4,5,2,0,2],[2,1,3,0,1],[2,2,3,1,3]],"q":[0,0,4,4,3,3,2,2,3,3,0,0,2,2,3,0,0,3,3,1,0,1,1,5,5,1,1,1],"sp":2},{"cars":[[1,2,3,0,2],[0,3,2,1,0],[1,4,3,0,1],[3,1,2,0,5],[1,0,2,0,4],[5,3,3,1,0],[5,0,3,1,5],[0,0,2,1,0],[2,5,2,0,3],[4,2,2,1,1],[1,1,2,0,1],[1,3,2,0,3],[0,5,2,0,0]],"q":[0,0,0,0,4,3,3,5,4,5,5,5,0,5,0,1,2,2,2,0,1,0,1,0,1,1,1,1,3,3],"sp":2},{"cars":[[0,0,2,1,5],[2,1,2,0,4],[3,2,2,1,0],[0,3,2,1,4],[5,2,2,1,1],[4,0,2,0,5],[1,5,2,0,3],[2,4,2,0,3],[4,1,2,0,3],[2,0,2,0,2],[1,3,2,1,4],[2,2,2,1,1]],"q":[3,4,4,3,2,5,5,4,2,4,1,5,5,1,3,3,3,3,4,4,1,0,1,0],"sp":2},{"cars":[[0,4,2,0,0],[5,0,3,1,0],[4,5,2,0,4],[2,0,3,1,0],[0,3,2,0,3],[3,0,2,0,1],[4,2,2,1,2],[2,3,3,1,0],[1,0,3,1,1],[3,2,3,1,1],[5,3,2,1,5],[0,0,3,1,0],[3,1,2,0,5]],"q":[0,0,0,0,0,4,4,3,5,3,0,5,1,0,0,1,5,5,2,1,1,2,1,1,1,1,0,0,0,0,0,0],"sp":2},{"cars":[[2,1,2,1,5],[4,3,2,0,4],[3,5,3,0,0],[1,1,3,1,0],[2,0,2,0,1],[2,4,2,0,0],[0,1,2,1,4],[0,3,2,1,2],[3,2,2,1,2],[4,1,2,0,5],[4,4,2,0,0],[0,5,2,0,3],[4,0,2,0,0]],"q":[1,5,1,5,3,3,5,5,2,2,4,2,4,4,2,4,0,0,0,0,0,0,0,0,0,0,0,0],"sp":2},{"cars":[[2,1,3,1,1],[2,5,3,0,0],[3,0,2,0,1],[0,3,2,1,5],[2,4,3,0,3],[5,1,2,1,4],[0,0,2,1,0],[1,0,2,1,2],[1,2,2,1,2],[4,1,2,1,2],[5,3,3,1,3],[0,5,2,0,1]],"q":[4,2,2,4,1,1,0,1,1,0,5,5,0,1,1,1,3,3,3,2,3,2,0,3,0,3,2,2],"sp":2},{"cars":[[1,4,2,1,5],[2,5,3,0,1],[1,1,3,1,3],[0,4,2,1,2],[3,4,2,0,5],[3,3,2,0,0],[3,1,3,0,2],[0,2,2,1,5],[2,2,2,1,1],[2,0,2,1,2],[4,0,2,0,2],[0,0,2,0,1],[3,2,2,0,4]],"q":[4,4,0,2,2,5,5,2,0,3,2,3,2,3,1,1,2,5,5,5,5,2,2,2,1,1,1,1,1],"sp":2},{"cars":[[0,4,2,1,4],[3,5,3,0,0],[5,1,3,1,0],[1,0,2,0,5],[2,3,2,0,0],[2,1,2,1,2],[4,0,2,0,1],[3,0,2,1,0],[1,4,3,0,5],[0,2,2,0,1],[4,2,3,1,1],[0,3,2,0,0],[0,1,2,0,2],[1,5,2,0,3]],"q":[2,2,0,0,0,0,1,1,0,0,0,5,1,5,1,0,2,2,0,1,5,1,5,1,5,4,4,0,0,0,3,3],"sp":2}]};
+
+/* ============ harbor puzzles: v = boats [row,col,len,horiz] (v[0]=red ferry), rocks = immovable cells,
+   K = moves per tide surge, cyc = current cycle (0=E,1=W,2=N,3=S); par = tide-aware BFS minimum. ============ */
+var HARBOR = {"easy":[{"v":[[2,0,2,1],[4,1,3,1],[5,3,2,1],[3,5,3,0],[0,3,3,1],[1,5,2,0],[2,4,2,0],[0,1,2,0],[1,3,2,1]],"rocks":[],"K":4,"cyc":[3],"par":4},{"v":[[2,0,2,1],[4,0,2,1],[5,2,2,1],[0,0,2,0],[1,2,2,0],[0,1,3,1],[3,1,2,1],[2,3,2,0]],"rocks":[],"K":4,"cyc":[2],"par":4},{"v":[[2,2,2,1],[4,0,2,1],[0,2,2,1],[5,3,3,1],[0,4,3,0],[0,0,2,0],[2,5,2,0]],"rocks":[],"K":4,"cyc":[1],"par":4},{"v":[[2,2,2,1],[4,5,2,0],[0,4,3,0],[3,3,2,1],[0,2,2,0],[4,1,2,0],[4,0,2,0],[5,3,2,1],[1,5,2,0]],"rocks":[],"K":4,"cyc":[1],"par":5},{"v":[[2,0,2,1],[0,2,2,0],[4,0,2,1],[2,4,2,0],[1,3,2,0],[5,3,3,1],[4,2,2,1],[0,5,2,0],[0,3,2,1]],"rocks":[],"K":4,"cyc":[2],"par":5},{"v":[[2,1,2,1],[3,0,2,0],[0,4,2,0],[4,2,2,0],[4,4,2,1],[5,3,3,1],[1,3,3,0],[0,1,2,1]],"rocks":[],"K":4,"cyc":[2],"par":4},{"v":[[2,1,2,1],[0,3,2,1],[4,2,2,1],[3,2,3,1],[0,5,3,0],[5,0,2,1],[1,0,3,1],[1,3,2,0]],"rocks":[],"K":4,"cyc":[3],"par":4},{"v":[[2,2,2,1],[2,1,3,0],[5,4,2,1],[4,3,3,1],[1,5,3,0],[5,2,2,1]],"rocks":[],"K":4,"cyc":[2],"par":6},{"v":[[2,0,2,1],[3,2,2,0],[2,4,3,0],[3,5,2,0],[1,3,2,0],[5,3,2,1],[4,0,2,1],[0,0,2,0],[0,4,2,0]],"rocks":[],"K":4,"cyc":[0],"par":4},{"v":[[2,0,2,1],[4,1,2,1],[0,5,2,0],[5,1,3,1],[0,3,2,1],[1,3,3,0],[2,5,2,0]],"rocks":[],"K":4,"cyc":[3],"par":4}],"moderate":[{"v":[[2,0,2,1],[1,2,3,0],[3,5,2,0],[5,2,2,1],[1,3,2,0],[4,1,2,1],[1,4,2,1],[0,4,2,1],[4,0,2,0],[3,3,2,0]],"rocks":[],"K":3,"cyc":[0],"par":13},{"v":[[2,2,2,1],[0,5,2,0],[1,4,2,0],[0,3,2,1],[5,1,2,1],[3,3,2,1],[3,0,3,1],[3,5,2,0],[4,0,2,0],[4,4,2,0],[0,2,2,0]],"rocks":[[1,1]],"K":3,"cyc":[3],"par":8},{"v":[[2,2,2,1],[4,4,2,1],[3,0,3,0],[1,0,2,0],[4,2,2,0],[3,3,3,1],[0,5,2,0],[0,4,3,0],[2,1,2,0]],"rocks":[],"K":3,"cyc":[2,1],"par":8},{"v":[[2,2,2,1],[0,0,2,1],[4,2,2,0],[0,4,3,0],[1,1,2,0],[2,5,2,0],[1,0,2,0],[4,4,2,1],[0,5,2,0],[3,0,2,1],[4,0,2,0]],"rocks":[],"K":3,"cyc":[3,1],"par":12},{"v":[[2,1,2,1],[0,4,2,0],[1,5,3,0],[0,2,2,1],[3,1,2,0],[3,2,3,1],[1,3,2,0],[4,2,2,0],[5,3,2,1],[0,0,2,1],[3,0,2,0]],"rocks":[[4,3]],"K":3,"cyc":[2,0],"par":8},{"v":[[2,2,2,1],[1,0,2,1],[2,4,3,0],[2,0,2,0],[1,5,2,0],[4,2,2,0],[1,2,2,1],[4,0,2,0],[5,3,2,1],[3,1,2,1],[4,5,2,0]],"rocks":[[0,3]],"K":3,"cyc":[1],"par":8},{"v":[[2,0,2,1],[0,0,2,0],[1,4,2,0],[1,5,3,0],[4,4,2,1],[4,1,2,0],[3,3,2,0],[4,2,2,0],[0,3,3,1],[5,3,2,1]],"rocks":[],"K":3,"cyc":[3],"par":8},{"v":[[2,0,2,1],[4,4,2,0],[0,5,2,0],[3,4,2,1],[5,1,3,1],[1,2,3,0],[0,0,2,0],[4,5,2,0],[1,3,2,1],[0,3,2,1]],"rocks":[[4,1]],"K":3,"cyc":[1,3],"par":8},{"v":[[2,0,2,1],[1,2,2,0],[0,0,2,0],[4,0,2,1],[5,3,2,1],[4,3,2,1],[0,4,3,0],[3,3,2,1],[0,5,2,0],[5,1,2,1],[0,2,2,1]],"rocks":[],"K":3,"cyc":[0],"par":8},{"v":[[2,0,2,1],[5,0,2,1],[3,1,3,1],[4,4,2,1],[0,5,3,0],[1,2,2,1],[0,3,2,1],[5,3,3,1],[4,0,2,1],[0,1,2,1],[4,2,2,0]],"rocks":[],"K":3,"cyc":[0,3],"par":9}],"hard":[{"v":[[2,2,2,1],[1,4,2,0],[1,0,2,0],[0,2,2,0],[3,3,3,1],[5,0,3,1],[0,1,2,0],[1,5,2,0],[2,1,2,0],[5,4,2,1],[0,3,2,1],[4,1,3,1]],"rocks":[[1,3],[0,5]],"K":3,"cyc":[0,1,3],"par":15},{"v":[[2,0,2,1],[3,3,2,0],[1,5,2,0],[1,1,3,1],[3,2,3,0],[4,0,2,0],[0,1,2,1],[4,4,2,1],[3,1,2,0],[2,4,2,0]],"rocks":[[0,4],[0,5]],"K":3,"cyc":[0,1,0],"par":14},{"v":[[2,2,2,1],[4,2,2,0],[4,4,2,1],[0,4,3,0],[5,3,2,1],[2,0,3,0],[1,5,2,0],[0,1,2,0],[2,1,2,0],[0,2,2,1],[5,0,2,1],[3,3,2,0]],"rocks":[[0,0]],"K":3,"cyc":[0,2,0],"par":17},{"v":[[2,0,2,1],[0,3,2,0],[1,0,2,1],[4,2,2,0],[4,0,2,0],[4,1,2,0],[4,3,2,1],[3,1,2,1],[2,3,2,0],[1,4,2,0],[0,4,2,1]],"rocks":[[0,2]],"K":3,"cyc":[0,3],"par":20},{"v":[[2,1,2,1],[0,4,3,0],[1,1,3,1],[0,0,2,0],[4,4,2,1],[3,4,2,1],[3,2,2,0],[5,2,2,1],[0,5,2,0],[3,1,2,0]],"rocks":[[5,0]],"K":3,"cyc":[0,3,2],"par":14},{"v":[[2,2,2,1],[3,0,3,1],[0,1,3,0],[0,0,3,0],[0,4,2,1],[1,4,2,0],[5,4,2,1],[3,4,2,0],[0,2,2,0],[1,5,2,0]],"rocks":[[3,5]],"K":3,"cyc":[1,0],"par":13},{"v":[[2,1,2,1],[0,2,3,1],[1,0,2,0],[3,3,3,0],[4,0,2,0],[1,1,2,1],[1,4,3,0],[4,4,2,1],[4,2,2,0],[5,4,2,1]],"rocks":[[3,0]],"K":3,"cyc":[1,0],"par":13},{"v":[[2,0,2,1],[4,1,2,1],[1,2,3,0],[0,1,3,1],[3,4,2,0],[0,4,2,1],[1,4,2,1],[3,3,2,0],[3,0,2,0]],"rocks":[[3,1]],"K":3,"cyc":[3,0,2],"par":13},{"v":[[2,0,2,1],[3,2,2,0],[0,2,2,1],[1,5,3,0],[4,4,2,1],[0,4,2,0],[5,0,3,1],[3,3,2,1],[1,2,2,0]],"rocks":[[0,5],[0,0]],"K":3,"cyc":[0,1,2],"par":12},{"v":[[2,0,2,1],[4,1,2,0],[0,1,3,1],[1,2,3,1],[2,5,3,0],[3,4,3,0],[3,0,2,1],[5,2,2,1],[0,4,2,1],[2,3,2,0],[0,0,2,0],[4,2,2,1]],"rocks":[[5,0],[4,0]],"K":3,"cyc":[2,0],"par":12}],"extreme":[{"v":[[2,1,2,1],[1,4,2,1],[3,1,2,1],[0,2,2,0],[4,0,3,1],[2,5,2,0],[2,4,2,0],[4,3,2,1],[0,3,2,0],[5,4,2,1],[2,0,2,0]],"rocks":[[0,5],[0,0],[5,1]],"K":2,"cyc":[0,3,0,1],"par":16},{"v":[[2,2,2,1],[5,2,2,1],[5,4,2,1],[0,0,3,1],[2,4,2,0],[4,4,2,1],[3,0,2,0],[3,3,2,0],[3,2,2,0],[0,5,2,0],[2,5,2,0],[0,3,2,0]],"rocks":[[5,1],[1,1]],"K":2,"cyc":[1,2,0],"par":22},{"v":[[2,1,2,1],[2,3,2,0],[2,4,3,0],[4,2,2,0],[1,4,2,1],[5,3,2,1],[0,3,2,0],[3,0,3,1],[0,1,2,1],[0,0,2,0]],"rocks":[[4,5],[5,1]],"K":2,"cyc":[3,1,3],"par":18},{"v":[[2,1,2,1],[4,3,2,1],[3,0,2,0],[0,3,2,0],[5,3,3,1],[1,4,2,0],[0,1,2,0],[0,4,2,1],[0,0,2,0],[2,5,2,0],[3,1,2,1],[2,3,2,0]],"rocks":[[4,2],[1,2]],"K":2,"cyc":[2,1,3],"par":15},{"v":[[2,2,2,1],[4,4,2,1],[1,1,3,0],[1,4,3,0],[0,0,3,0],[0,2,2,1],[4,2,2,0],[4,3,2,0],[2,5,2,0],[0,4,2,1],[5,0,2,1]],"rocks":[[1,5],[5,5]],"K":2,"cyc":[3,0,1],"par":14},{"v":[[2,1,2,1],[4,1,2,0],[3,1,2,1],[1,4,3,0],[3,3,2,0],[4,4,2,1],[3,0,3,0],[1,1,2,1],[1,0,2,0],[0,3,3,1],[5,2,2,1]],"rocks":[[0,2],[1,5]],"K":2,"cyc":[1,0,3],"par":13},{"v":[[2,0,2,1],[2,3,2,0],[4,1,2,1],[5,3,3,1],[3,4,2,0],[1,4,2,1],[0,1,2,1],[5,0,2,1],[2,2,2,0],[3,0,2,0]],"rocks":[[0,4],[1,2]],"K":2,"cyc":[1,2,3],"par":13},{"v":[[2,0,2,1],[0,1,2,0],[4,5,2,0],[5,3,2,1],[0,2,3,1],[2,2,3,0],[1,3,2,0],[4,0,2,0],[4,3,2,1],[1,4,2,1]],"rocks":[[0,5],[3,0]],"K":2,"cyc":[2,0],"par":12},{"v":[[2,1,2,1],[0,2,3,1],[3,3,2,1],[3,0,3,0],[0,1,2,0],[3,2,2,0],[1,3,2,0],[4,3,3,1],[1,4,2,0],[0,5,2,0]],"rocks":[[5,2],[5,3],[5,5]],"K":2,"cyc":[3,2,0],"par":12},{"v":[[2,0,2,1],[0,5,2,0],[0,3,2,0],[2,2,2,0],[3,3,3,0],[0,4,2,0],[0,0,2,0],[3,4,2,1],[0,1,2,1],[4,5,2,0]],"rocks":[[1,1],[4,2]],"K":2,"cyc":[0,2,1],"par":12}]};
+var HB_ARROW = ["→","←","↑","↓"];
 
 var MODES = ["easy","moderate","hard","extreme"];
 var MODE_LABEL = {easy:"Easy", moderate:"Moderate", hard:"Hard", extreme:"Extreme"};
@@ -450,6 +505,10 @@ var vehicles = [], coords = [], par = 0, history = [], selected = -1;
 /* carpool state */
 var cp = null;      // {cars, alive[], slots[], queue[], qi, boarded, extracted}
 var cpBusy = false, cpTimers = [];
+
+/* harbor state (shares vehicles/coords/par/history with classic) */
+var hb = null;      // {rocks, K, cyc, tick, si}
+var hbBusy = false, hbTimers = [];
 
 /* ============ audio (all synthesized) ============ */
 var actx = null;
@@ -518,6 +577,9 @@ function placeCarEl(el, r, c, len, h){
 /* ==================================================================== */
 function occupancy(exceptI){
   var g = []; for(var k=0;k<N*N;k++) g.push(-1);
+  if(variant==="harbor" && hb){
+    for(var q=0;q<hb.rocks.length;q++) g[hb.rocks[q][0]*N + hb.rocks[q][1]] = 99;
+  }
   for(var i=0;i<vehicles.length;i++){
     if(i===exceptI) continue;
     var v=vehicles[i], h=v[3], len=v[2];
@@ -551,7 +613,7 @@ function positionCar(i, el){
   placeCarEl(el, r, c, len, h);
 }
 function updateStats(){
-  if(variant==="classic"){
+  if(variant!=="carpool"){
     labA.textContent = "Moves"; labB.textContent = "Par";
     stMoves.className = "val" + (history.length > par ? " over" : "");
     stMoves.textContent = history.length;
@@ -568,22 +630,44 @@ function updateStats(){
 }
 function commitMove(i, from, to){
   if(from===to) return;
+  if(variant==="harbor"){
+    // full snapshot so undo can also revert tide drift; every slide is a move (matches par)
+    var snap = coords.slice(); snap[i] = from;
+    history.push({snap:snap, tick:hb.tick, si:hb.si});
+    startTimer(); updateStats();
+    if(coords[0] + vehicles[0][2] === N){ slidingWin(); return; }
+    hb.tick++;
+    if(hb.tick === hb.K){
+      hb.tick = 0;
+      hbBusy = true;
+      hbTimers.push(setTimeout(runSurge, 240));
+    }
+    renderTide();
+    return;
+  }
   var last = history[history.length-1];
   if(last && last.i===i){ last.to = to; if(last.from===last.to) history.pop(); }
   else history.push({i:i, from:from, to:to});
   startTimer(); updateStats();
-  if(i===0 && coords[0] + vehicles[0][2] === N) classicWin();
+  if(i===0 && coords[0] + vehicles[0][2] === N) slidingWin();
 }
 function undo(){
-  if(variant!=="classic" || !history.length || winning) return;
+  if(variant==="carpool" || !history.length || winning || hbBusy) return;
   var m = history.pop();
-  coords[m.i] = m.from;
-  positionCar(m.i);
+  if(variant==="harbor"){
+    coords = m.snap.slice();
+    hb.tick = m.tick; hb.si = m.si;
+    for(var j=0;j<vehicles.length;j++) positionCar(j);
+    renderTide();
+  } else {
+    coords[m.i] = m.from;
+    positionCar(m.i);
+  }
   sUndo(); updateStats();
 }
 function attachDrag(el, i){
   el.addEventListener("pointerdown", function(e){
-    if(winning || variant!=="classic") return;
+    if(winning || hbBusy || variant==="carpool") return;
     e.preventDefault();
     audio();
     select(i);
@@ -636,7 +720,7 @@ function select(i){
   if(i>=0 && carEl(i)) carEl(i).classList.add("selected");
 }
 document.addEventListener("keydown", function(e){
-  if(variant!=="classic" || winning || selected<0) return;
+  if(variant==="carpool" || winning || hbBusy || selected<0) return;
   var h = vehicles[selected][3], dir = 0;
   if(h && e.key==="ArrowLeft") dir=-1;
   else if(h && e.key==="ArrowRight") dir=1;
@@ -649,12 +733,13 @@ document.addEventListener("keydown", function(e){
   if(to<range[0] || to>range[1]){ sBlocked(); shakeBoard(); return; }
   coords[selected]=to; positionCar(selected); sDrop(); commitMove(selected, from, to);
 });
-function classicWin(){
+function slidingWin(){
   winning = true;
   stopTimer();
   select(-1);
   var red = carEl(0);
-  sWin();
+  var isHb = variant==="harbor";
+  if(isHb) sFoghorn(); else sWin();
   if(!reducedMotion){
     red.classList.add("exiting");
     red.style.left = ((coords[0]+3.4)/N*100)+"%";
@@ -663,10 +748,10 @@ function classicWin(){
   var moves = history.length, timeMs = elapsedMs;
   setTimeout(function(){
     showOverlay({
-      win:true, variant:"classic", mode:mode, puz:puzIdx+1,
-      title:"Traffic cleared!",
+      win:true, variant:variant, mode:mode, puz:puzIdx+1,
+      title: isHb? "Open water!" : "Traffic cleared!",
       note: (moves-par)<=0 ? '<span class="good">Perfect — you matched par!</span>'
-            : "+"+(moves-par)+" over par on "+MODE_LABEL[mode].toLowerCase()+" jam #"+(puzIdx+1),
+            : "+"+(moves-par)+" over par on "+(isHb?"harbor ":"")+MODE_LABEL[mode].toLowerCase()+" jam #"+(puzIdx+1),
       a:moves, aLab:"Moves", b:par, bLab:"Par", t:timeMs,
       entry:{n:"", m:moves, p:par, t:timeMs, puz:puzIdx+1, date:Date.now()}
     });
@@ -681,6 +766,121 @@ function loadClassic(m, idx){
   renderClassic();
   updateStats();
   puzline.textContent = MODE_LABEL[m] + " jam #" + (idx+1) + " of " + PUZZLES[m].length + " · par " + p.par;
+}
+
+/* ==================================================================== */
+/* ============================ HARBOR ================================ */
+/* ==================================================================== */
+function sCurrent(){ tone(420,0.55,"sine",0.06,0,110); tone(240,0.6,"triangle",0.05,0.05,70); }
+function sFoghorn(){
+  tone(98,0.6,"sawtooth",0.14); tone(147,0.6,"sawtooth",0.08);
+  tone(98,0.85,"sawtooth",0.14,0.75); tone(147,0.85,"sawtooth",0.08,0.75);
+  var notes=[523,659,784,1047], i;
+  for(i=0;i<notes.length;i++) tone(notes[i],0.16,"triangle",0.12,1.7+i*0.11);
+}
+/* Tide drift: boats aligned with the current drift 1 cell if the target is free,
+   leaders first so convoys drift together. Mirrors the generator exactly. */
+function applySurge(dir){
+  var horiz = (dir===0 || dir===1);
+  var inc = (dir===0 || dir===3);
+  var idx = [];
+  for(var i=0;i<vehicles.length;i++) if(!!vehicles[i][3] === horiz) idx.push(i);
+  idx.sort(inc ? function(a,b){ return coords[b]-coords[a]; } : function(a,b){ return coords[a]-coords[b]; });
+  var g = occupancy(-1);
+  var moved = false;
+  for(var k=0;k<idx.length;k++){
+    var j = idx[k], v = vehicles[j], h = v[3], len = v[2];
+    var fixed = h? v[0] : v[1], pos = coords[j];
+    var tgt = inc? pos+len : pos-1;
+    if(tgt < 0 || tgt >= N) continue;
+    var cell = h? g[fixed*N + tgt] : g[tgt*N + fixed];
+    if(cell === -1){
+      var tail = inc? pos : pos+len-1;
+      if(h){ g[fixed*N + tail] = -1; g[fixed*N + tgt] = j; }
+      else { g[tail*N + fixed] = -1; g[tgt*N + fixed] = j; }
+      coords[j] = inc? pos+1 : pos-1;
+      moved = true;
+    }
+  }
+  return moved;
+}
+function runSurge(){
+  if(variant!=="harbor" || winning){ hbBusy = false; return; }
+  var dir = hb.cyc[hb.si];
+  hb.si = (hb.si + 1) % hb.cyc.length;
+  applySurge(dir);
+  sCurrent();
+  var tideEl = document.getElementById("tide");
+  tideEl.classList.remove("surge"); void tideEl.offsetWidth; tideEl.classList.add("surge");
+  for(var j=0;j<vehicles.length;j++){
+    var el = carEl(j);
+    if(el){ el.classList.add("drift"); positionCar(j, el); }
+  }
+  hbTimers.push(setTimeout(function(){
+    document.querySelectorAll("#board .car").forEach(function(el){ el.classList.remove("drift"); });
+    hbBusy = false;
+    renderTide();
+    if(coords[0] + vehicles[0][2] === N) slidingWin();
+  }, reducedMotion? 80 : 620));
+}
+function renderTide(){
+  if(variant!=="harbor" || !hb) return;
+  var pips = document.getElementById("tidePips");
+  pips.innerHTML = "";
+  var rem = hb.K - hb.tick;
+  for(var k=0;k<hb.K;k++){
+    var d = document.createElement("span");
+    d.className = "pip" + (k < rem ? " on" : "");
+    pips.appendChild(d);
+  }
+  document.getElementById("tideDir").textContent =
+    HB_ARROW[hb.cyc[hb.si]] + " in " + rem + " move" + (rem===1?"":"s");
+  var fore = "";
+  if(hb.cyc.length > 1){
+    fore = "then " + HB_ARROW[hb.cyc[(hb.si+1)%hb.cyc.length]];
+    if(hb.cyc.length > 2) fore += " " + HB_ARROW[hb.cyc[(hb.si+2)%hb.cyc.length]];
+  } else fore = "steady " + HB_ARROW[hb.cyc[0]];
+  document.getElementById("tideFore").textContent = fore;
+}
+function renderHarbor(){
+  board.innerHTML = "";
+  var i;
+  for(i=0;i<hb.rocks.length;i++){
+    var rk = document.createElement("div");
+    rk.className = "rock";
+    rk.style.left = (hb.rocks[i][1]/N*100)+"%";
+    rk.style.top = (hb.rocks[i][0]/N*100)+"%";
+    rk.style.width = (100/N)+"%";
+    rk.style.height = (100/N)+"%";
+    board.appendChild(rk);
+  }
+  for(i=0;i<vehicles.length;i++){
+    var v=vehicles[i], h=v[3], len=v[2];
+    var bg = i>0 ? grad(CAR_COLORS[(i-1)%CAR_COLORS.length]) : null;
+    var el = makeCarEl(i, h, len, bg, i===0);
+    el.querySelector(".body").style.animationDelay = ((i*0.37)%2.8).toFixed(2)+"s";
+    board.appendChild(el);
+    positionCar(i, el);
+    attachDrag(el, i);
+  }
+}
+function loadHarbor(m, idx){
+  var p = HARBOR[m][idx];
+  vehicles = p.v; par = p.par;
+  coords = vehicles.map(function(v){ return v[3]? v[1] : v[0]; });
+  history = [];
+  hb = { rocks: p.rocks, K: p.K, cyc: p.cyc, tick: 0, si: 0 };
+  select(-1);
+  renderHarbor();
+  updateStats();
+  renderTide();
+  document.getElementById("howto").innerHTML =
+    '<b>Drag boats along their lane</b> — sail the <b style="color:var(--hero)">red ferry</b> out to open water. ' +
+    'Every <b>' + p.K + ' moves the tide surges</b> in the forecast direction and every boat aligned with it drifts one cell ' +
+    '(keels hold against cross-currents' + (p.rocks.length? ', rocks never move':'') + '). ' +
+    'Ride a surge out the exit — it counts. Every drag or key press is one move.';
+  puzline.textContent = "Harbor " + MODE_LABEL[m].toLowerCase() + " jam #" + (idx+1) + " of " + HARBOR[m].length +
+    " · par " + p.par + " · tide every " + p.K;
 }
 
 /* ==================================================================== */
@@ -917,22 +1117,27 @@ var HOWTO = {
 };
 var TAGLINE = {
   classic: "Car jam puzzles · free the red car",
-  carpool: "Car jam puzzles · carpool the line home"
+  carpool: "Car jam puzzles · carpool the line home",
+  harbor: "Car jam puzzles · ride the tide out"
 };
-function pool(){ return variant==="classic" ? PUZZLES : CARPOOL; }
+function pool(){ return variant==="classic" ? PUZZLES : variant==="carpool" ? CARPOOL : HARBOR; }
 function load(m, idx){
   mode = m; puzIdx = idx;
   winning = false;
-  cpBusy = false;
+  cpBusy = false; hbBusy = false;
   cpTimers.forEach(clearTimeout); cpTimers = [];
+  hbTimers.forEach(clearTimeout); hbTimers = [];
   resetTimer();
   boardFrame.classList.toggle("cp", variant==="carpool");
+  boardFrame.classList.toggle("hb", variant==="harbor");
   dock.hidden = variant!=="carpool";
-  document.getElementById("btnUndo").style.display = variant==="classic" ? "" : "none";
-  document.getElementById("howto").innerHTML = HOWTO[variant];
+  document.getElementById("tide").hidden = variant!=="harbor";
+  document.getElementById("btnUndo").style.display = variant==="carpool" ? "none" : "";
+  if(HOWTO[variant]) document.getElementById("howto").innerHTML = HOWTO[variant];
   document.getElementById("tagline").textContent = TAGLINE[variant];
   if(variant==="classic") loadClassic(m, idx);
-  else loadCarpool(m, idx);
+  else if(variant==="carpool") loadCarpool(m, idx);
+  else loadHarbor(m, idx);
   document.querySelectorAll(".mode").forEach(function(el){
     el.classList.toggle("on", el.dataset.m===m);
     el.setAttribute("aria-selected", el.dataset.m===m ? "true":"false");
@@ -1005,7 +1210,7 @@ function showOverlay(o){
   document.getElementById("btnReplay").textContent = o.win ? "Replay" : "Retry";
   if(canSave){
     pendingEntry = o.entry;
-    pendingKey = (o.variant==="classic"? "" : "cp_") + o.mode;
+    pendingKey = (o.variant==="classic"? "" : o.variant==="carpool"? "cp_" : "hb_") + o.mode;
     var ni = document.getElementById("nameInput");
     ni.value = localStorage.getItem("cj_name") || "";
   } else { pendingEntry = null; pendingKey = null; }
@@ -1033,7 +1238,7 @@ function lbAdd(key, entry){
 function renderLb(){
   var vt = document.getElementById("lbVTabs");
   vt.innerHTML = "";
-  [["classic","Classic"],["carpool","Carpool"]].forEach(function(pair){
+  [["classic","Classic"],["carpool","Carpool"],["harbor","Harbor"]].forEach(function(pair){
     var b = document.createElement("button");
     b.className = "lb-tab" + (pair[0]===lbVariant? " on":"");
     b.textContent = pair[1];
@@ -1049,10 +1254,10 @@ function renderLb(){
     b.addEventListener("click", function(){ lbMode=m; renderLb(); });
     tabs.appendChild(b);
   });
-  document.getElementById("lbSub").textContent = lbVariant==="classic"
-    ? "Classic: ranked by moves over par, then time. Stored on this device."
-    : "Carpool: ranked by time. Stored on this device.";
-  var key = (lbVariant==="classic"? "" : "cp_") + lbMode;
+  document.getElementById("lbSub").textContent = lbVariant==="carpool"
+    ? "Carpool: ranked by time. Stored on this device."
+    : (lbVariant==="harbor" ? "Harbor" : "Classic") + ": ranked by moves over par, then time. Stored on this device.";
+  var key = (lbVariant==="classic"? "" : lbVariant==="carpool"? "cp_" : "hb_") + lbMode;
   var rows = (lbLoad()[key]||[]).slice(0,8);
   var host = document.getElementById("lbBody");
   if(!rows.length){
@@ -1060,7 +1265,7 @@ function renderLb(){
     return;
   }
   var html;
-  if(lbVariant==="classic"){
+  if(lbVariant!=="carpool"){
     html = '<table><thead><tr><th>#</th><th>Driver</th><th>Jam</th><th>Moves</th><th>Time</th></tr></thead><tbody>';
     rows.forEach(function(r,idx){
       var d = r.m - r.p;
@@ -1124,8 +1329,8 @@ document.getElementById("btnSave").addEventListener("click", function(){
   lbAdd(pendingKey, pendingEntry);
   document.getElementById("saveRow").style.display = "none";
   document.getElementById("savedMsg").style.display = "block";
-  lbVariant = pendingKey.indexOf("cp_")===0 ? "carpool" : "classic";
-  lbMode = pendingKey.replace("cp_","");
+  lbVariant = pendingKey.indexOf("cp_")===0 ? "carpool" : pendingKey.indexOf("hb_")===0 ? "harbor" : "classic";
+  lbMode = pendingKey.replace("cp_","").replace("hb_","");
   pendingEntry = null; pendingKey = null;
   renderLb();
   tone(880,0.08,"sine",0.08); tone(1175,0.1,"sine",0.08,0.08);
@@ -1142,7 +1347,7 @@ document.getElementById("btnNext").addEventListener("click", function(){
   sClick(); newJam();
 });
 
-board.addEventListener("pointerdown", function(e){ if(e.target===board && variant==="classic") select(-1); });
+board.addEventListener("pointerdown", function(e){ if(e.target===board && variant!=="carpool") select(-1); });
 
 load("easy", Math.floor(Math.random()*PUZZLES.easy.length));
 renderLb();
